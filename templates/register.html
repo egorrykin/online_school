@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+
+{% block title %}Регистрация - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .register-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .register-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  .register-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .register-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .register-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .register-body {
+    padding: 2rem;
+    background: white;
+  }
+
+  .role-selection {
+    margin: 2rem 0;
+  }
+
+  .role-card {
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 100%;
+  }
+
+  .role-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  }
+
+  .role-card.selected {
+    border-color: var(--primary-color);
+    background: rgba(74, 107, 223, 0.05);
+  }
+
+  .role-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+
+  .teacher-icon {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+
+  .student-icon {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+  }
+
+  .role-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .role-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .form-check-label {
+    cursor: pointer;
+  }
+
+  .password-requirements {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .requirement {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .requirement.valid i {
+    color: var(--success-color);
+  }
+
+  .requirement.invalid i {
+    color: var(--danger-color);
+  }
+
+  .login-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container fade-in">
+  <div class="register-card">
+    <div class="register-header">
+      <h1 class="register-title">
+        <i class="fas fa-user-plus"></i> Регистрация
+      </h1>
+      <p class="register-subtitle">
+        Создайте аккаунт в Online School и начните обучение
+      </p>
+    </div>
+
+    <div class="register-body">
+      <form method="post" id="registerForm">
+        {% csrf_token %}
+
+        <!-- Выбор роли -->
+        <div class="form-section">
+          <h3 class="section-title">Выберите вашу роль</h3>
+
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="role-card" id="studentCard" onclick="selectRole('student')">
+                <div class="role-icon student-icon">
+                  <i class="fas fa-user-graduate"></i>
+                </div>
+                <h4 class="role-title">Ученик</h4>
+                <p class="role-description">
+                  Изучайте курсы, выполняйте задания и отслеживайте свой прогресс
+                </p>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="role"
+                         id="role_student" value="student" required>
+                  <label class="form-check-label" for="role_student">
+                    Выбрать роль ученика
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <div class="role-card" id="teacherCard" onclick="selectRole('teacher')">
+                <div class="role-icon teacher-icon">
+                  <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h4 class="role-title">Учитель</h4>
+                <p class="role-description">
+                  Создавайте курсы, назначайте задания и оценивайте работы учеников
+                </p>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="role"
+                         id="role_teacher" value="teacher" required>
+                  <label class="form-check-label" for="role_teacher">
+                    Выбрать роль учителя
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Основная информация -->
+        <div class="form-section">
+          <h3 class="section-title">Основная информация</h3>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_first_name" class="form-label">
+                <i class="fas fa-user"></i> Имя
+              </label>
+              <input type="text" name="first_name" id="id_first_name"
+                     class="form-control" required
+                     placeholder="Введите ваше имя">
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="id_last_name" class="form-label">
+                <i class="fas fa-user"></i> Фамилия
+              </label>
+              <input type="text" name="last_name" id="id_last_name"
+                     class="form-control" required
+                     placeholder="Введите вашу фамилию">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_username" class="form-label">
+                <i class="fas fa-at"></i> Имя пользователя
+              </label>
+              <input type="text" name="username" id="id_username"
+                     class="form-control" required
+                     placeholder="Придумайте имя пользователя">
+              <small class="form-text text-muted">
+                Будет использоваться для входа в систему
+              </small>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="id_email" class="form-label">
+                <i class="fas fa-envelope"></i> Email
+              </label>
+              <input type="email" name="email" id="id_email"
+                     class="form-control" required
+                     placeholder="example@school.ru">
+            </div>
+          </div>
+        </div>
+
+        <!-- Пароль -->
+        <div class="form-section">
+          <h3 class="section-title">Безопасность</h3>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_password1" class="form-label">
+                <i class="fas fa-lock"></i> Пароль
+              </label>
+              <input type="password" name="password1" id="id_password1"
+                     class="form-control" required
+                     placeholder="Придумайте надежный пароль">
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="id_password2" class="form-label">
+                <i class="fas fa-lock"></i> Подтверждение пароля
+              </label>
+              <input type="password" name="password2" id="id_password2"
+                     class="form-control" required
+                     placeholder="Повторите пароль">
+            </div>
+          </div>
+
+          <div class="password-requirements">
+            <p class="mb-2"><strong>Требования к паролю:</strong></p>
+            <div class="requirement" id="length-req">
+              <i class="fas fa-circle"></i>
+              Минимум 8 символов
+            </div>
+            <div class="requirement" id="number-req">
+              <i class="fas fa-circle"></i>
+              Содержит цифры
+            </div>
+            <div class="requirement" id="letter-req">
+              <i class="fas fa-circle"></i>
+              Содержит буквы
+            </div>
+          </div>
+        </div>
+
+        <!-- Соглашение -->
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="terms" required>
+          <label class="form-check-label" for="terms">
+            Я соглашаюсь с
+            <a href="#" style="color: var(--primary-color);">Условиями использования</a>
+            и
+            <a href="#" style="color: var(--primary-color);">Политикой конфиденциальности</a>
+          </label>
+        </div>
+
+        <!-- Кнопка регистрации -->
+        <button type="submit" class="btn btn-primary btn-lg w-100">
+          <i class="fas fa-user-plus"></i> Создать аккаунт
+        </button>
+      </form>
+
+      <div class="login-link">
+        <p>Уже есть аккаунт?
+          <a href="{% url 'login' %}" style="color: var(--primary-color); font-weight: 600;">
+            <i class="fas fa-sign-in-alt"></i> Войти в систему
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Выбор роли
+    window.selectRole = function(role) {
+      const studentCard = document.getElementById('studentCard');
+      const teacherCard = document.getElementById('teacherCard');
+      const studentRadio = document.getElementById('role_student');
+      const teacherRadio = document.getElementById('role_teacher');
+
+      if (role === 'student') {
+        studentCard.classList.add('selected');
+        teacherCard.classList.remove('selected');
+        studentRadio.checked = true;
+      } else {
+        teacherCard.classList.add('selected');
+        studentCard.classList.remove('selected');
+        teacherRadio.checked = true;
+      }
+    };
+
+    // Валидация пароля
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+
+    password1.addEventListener('input', function() {
+      const password = this.value;
+
+      // Проверка длины
+      const lengthReq = document.getElementById('length-req');
+      if (password.length >= 8) {
+        lengthReq.classList.add('valid');
+        lengthReq.classList.remove('invalid');
+        lengthReq.innerHTML = '<i class="fas fa-check-circle"></i> Минимум 8 символов';
+      } else {
+        lengthReq.classList.add('invalid');
+        lengthReq.classList.remove('valid');
+        lengthReq.innerHTML = '<i class="fas fa-times-circle"></i> Минимум 8 символов';
+      }
+
+      // Проверка наличия цифр
+      const numberReq = document.getElementById('number-req');
+      if (/\d/.test(password)) {
+        numberReq.classList.add('valid');
+        numberReq.classList.remove('invalid');
+        numberReq.innerHTML = '<i class="fas fa-check-circle"></i> Содержит цифры';
+      } else {
+        numberReq.classList.add('invalid');
+        numberReq.classList.remove('valid');
+        numberReq.innerHTML = '<i class="fas fa-times-circle"></i> Содержит цифры';
+      }
+
+      // Проверка наличия букв
+      const letterReq = document.getElementById('letter-req');
+      if (/[a-zA-Z]/.test(password)) {
+        letterReq.classList.add('valid');
+        letterReq.classList.remove('invalid');
+        letterReq.innerHTML = '<i class="fas fa-check-circle"></i> Содержит буквы';
+      } else {
+        letterReq.classList.add('invalid');
+        letterReq.classList.remove('valid');
+        letterReq.innerHTML = '<i class="fas fa-times-circle"></i> Содержит буквы';
+      }
+    });
+
+    // Проверка совпадения паролей
+    password2.addEventListener('input', function() {
+      if (password1.value !== password2.value && password2.value.length > 0) {
+        password2.classList.add('is-invalid');
+      } else {
+        password2.classList.remove('is-invalid');
+      }
+    });
+
+    // Автоматический выбор ученика по умолчанию
+    selectRole('student');
+  });
+</script>
+{% endblock %}

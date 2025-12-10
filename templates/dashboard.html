@@ -1,0 +1,515 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель управления - TaskFlow{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .welcome-message h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-message p {
+    color: var(--gray-color);
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .stat-content {
+    flex: 1;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--gray-color);
+  }
+
+  .dashboard-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .section-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f3f4f6;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .task-list {
+    list-style: none;
+  }
+
+  .task-item {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    border-left: 4px solid;
+    background: #f9fafb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--transition);
+  }
+
+  .task-item:hover {
+    background: white;
+    box-shadow: var(--shadow);
+  }
+
+  .task-item.todo {
+    border-left-color: var(--danger-color);
+  }
+
+  .task-item.in-progress {
+    border-left-color: var(--warning-color);
+  }
+
+  .task-item.done {
+    border-left-color: var(--success-color);
+  }
+
+  .task-info h4 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .task-meta {
+    font-size: 0.875rem;
+    color: var(--gray-color);
+    display: flex;
+    gap: 1rem;
+  }
+
+  .task-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .action-btn.edit {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+  }
+
+  .action-btn.edit:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .action-btn.delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+  }
+
+  .action-btn.delete:hover {
+    background: var(--danger-color);
+    color: white;
+  }
+
+  .action-btn.done {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+  }
+
+  .action-btn.done:hover {
+    background: var(--success-color);
+    color: white;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--gray-color);
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Заголовок -->
+  <div class="dashboard-header">
+    <div class="welcome-message">
+      <h1>👋 Добро пожаловать, {{ user.username }}!</h1>
+      <p>Вот что происходит с вашими задачами сегодня</p>
+    </div>
+    <a href="{% url 'create_task' %}" class="btn btn-primary">
+      <i class="fas fa-plus"></i> Новая задача
+    </a>
+  </div>
+
+  <!-- Быстрая статистика -->
+  <div class="quick-stats">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats.total }}</div>
+        <div class="stat-label">Всего задач</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+        <i class="fas fa-hourglass-half"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats.todo }}</div>
+        <div class="stat-label">К выполнению</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+        <i class="fas fa-spinner"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats.in_progress }}</div>
+        <div class="stat-label">В процессе</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats.done }}</div>
+        <div class="stat-label">Выполнено</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Основные разделы -->
+  <div class="dashboard-sections">
+    <!-- Задачи к выполнению -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-list-ul"></i> Задачи к выполнению
+        </h3>
+        <span class="badge" style="background: var(--danger-color); color: white;">
+                    {{ todo_tasks.count }}
+                </span>
+      </div>
+
+      {% if todo_tasks %}
+      <ul class="task-list">
+        {% for task in todo_tasks|slice:":5" %}
+        <li class="task-item todo">
+          <div class="task-info">
+            <h4>{{ task.title }}</h4>
+            <div class="task-meta">
+              {% if task.due_date %}
+              <span><i class="far fa-calendar"></i> {{ task.due_date|date:"d.m.Y" }}</span>
+              {% endif %}
+              <span><i class="fas fa-flag"></i> {{ task.get_priority_display }}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <form method="post" action="{% url 'mark_task_done' task.pk %}" class="action-form">
+              {% csrf_token %}
+              <button type="submit" class="action-btn done" title="Отметить выполненным">
+                <i class="fas fa-check"></i>
+              </button>
+            </form>
+            <a href="{% url 'update_task' task.pk %}" class="action-btn edit" title="Редактировать">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'delete_task' task.pk %}" class="action-btn delete" title="Удалить">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+
+      {% if todo_tasks.count > 5 %}
+      <div class="text-center mt-3">
+        <a href="#" class="btn btn-outline btn-sm">
+          Показать все {{ todo_tasks.count }} задач
+        </a>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-check-circle"></i>
+        <h4>Нет задач к выполнению</h4>
+        <p>Создайте новую задачу или перенесите существующие</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Задачи в процессе -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-spinner"></i> В процессе
+        </h3>
+        <span class="badge" style="background: var(--warning-color); color: white;">
+                    {{ in_progress_tasks.count }}
+                </span>
+      </div>
+
+      {% if in_progress_tasks %}
+      <ul class="task-list">
+        {% for task in in_progress_tasks|slice:":5" %}
+        <li class="task-item in-progress">
+          <div class="task-info">
+            <h4>{{ task.title }}</h4>
+            <div class="task-meta">
+              {% if task.due_date %}
+              <span><i class="far fa-calendar"></i> {{ task.due_date|date:"d.m.Y" }}</span>
+              {% endif %}
+              <span><i class="fas fa-flag"></i> {{ task.get_priority_display }}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <form method="post" action="{% url 'mark_task_done' task.pk %}" class="action-form">
+              {% csrf_token %}
+              <button type="submit" class="action-btn done" title="Отметить выполненным">
+                <i class="fas fa-check"></i>
+              </button>
+            </form>
+            <a href="{% url 'update_task' task.pk %}" class="action-btn edit" title="Редактировать">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'delete_task' task.pk %}" class="action-btn delete" title="Удалить">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+
+      {% if in_progress_tasks.count > 5 %}
+      <div class="text-center mt-3">
+        <a href="#" class="btn btn-outline btn-sm">
+          Показать все {{ in_progress_tasks.count }} задач
+        </a>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-clock"></i>
+        <h4>Нет задач в процессе</h4>
+        <p>Начните работать над одной из задач</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Последние выполненные -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-check-circle"></i> Последние выполненные
+        </h3>
+        <span class="badge" style="background: var(--success-color); color: white;">
+            {{ stats.done }}
+        </span>
+      </div>
+
+      {% if done_tasks %}
+      <ul class="task-list">
+        {% for task in done_tasks|slice:":5" %}
+        <li class="task-item done">
+          <div class="task-info">
+            <h4>{{ task.title }}</h4>
+            <div class="task-meta">
+              <span><i class="far fa-calendar"></i> Выполнено {{ task.updated_at|date:"d.m.Y" }}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <a href="{% url 'update_task' task.pk %}" class="action-btn edit" title="Редактировать">
+              <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'delete_task' task.pk %}" class="action-btn delete" title="Удалить">
+              <i class="fas fa-trash"></i>
+            </a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+
+      {% if done_tasks.count > 5 %}
+      <div class="text-center mt-3">
+        <a href="#" class="btn btn-outline btn-sm">
+          Показать все {{ done_tasks.count }} задач
+        </a>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-trophy"></i>
+        <h4>Нет выполненных задач</h4>
+        <p>Начните отмечать выполненные задачи</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Продуктивность -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">
+          <i class="fas fa-chart-line"></i> Ваша продуктивность
+        </h3>
+      </div>
+
+      <div class="productivity-stats">
+        <div class="progress-section mb-4">
+          <div class="d-flex justify-content-between mb-1">
+            <span>Задачи выполнено</span>
+            <span>{{ stats.done }}/{{ stats.total }}</span>
+          </div>
+          <div class="progress" style="height: 10px; border-radius: 5px;">
+            <div class="progress-bar bg-success"
+                 role="progressbar"
+                 style="width: {% if stats.total > 0 %}{% widthratio stats.done stats.total 100 %}{% else %}0{% endif %}%"
+                 aria-valuenow="{% if stats.total > 0 %}{% widthratio stats.done stats.total 100 %}{% else %}0{% endif %}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+          </div>
+        </div>
+
+        {% if stats.overdue > 0 %}
+        <div class="alert alert-error" style="padding: 0.75rem;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Просрочено задач:</strong> {{ stats.overdue }}
+        </div>
+        {% endif %}
+
+        {% if stats.high_priority > 0 %}
+        <div class="alert" style="background: #fff3cd; color: #856404; padding: 0.75rem;">
+          <i class="fas fa-exclamation-circle"></i>
+          <strong>Высокий приоритет:</strong> {{ stats.high_priority }} задач
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-3">
+          <a href="{% url 'create_task' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Добавить задачу
+          </a>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Анимация прогресс-бара
+    const progressBar = document.querySelector('.progress-bar');
+    const width = progressBar.style.width;
+    progressBar.style.width = '0';
+
+    setTimeout(() => {
+      progressBar.style.transition = 'width 1.5s ease-in-out';
+      progressBar.style.width = width;
+    }, 300);
+
+    // Подтверждение удаления
+    const deleteButtons = document.querySelectorAll('.action-btn.delete');
+    deleteButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        if (!confirm('Вы уверены, что хотите удалить эту задачу?')) {
+          e.preventDefault();
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

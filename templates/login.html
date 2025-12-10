@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .login-container {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .login-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  .login-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .login-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .login-body {
+    padding: 3rem;
+    background: white;
+  }
+
+  .form-control {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+  }
+
+  .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(74, 107, 223, 0.25);
+  }
+
+  .btn-login {
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+
+  .login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+  }
+
+  .register-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .forgot-password {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  .forgot-password:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container fade-in">
+  <div class="login-card">
+    <div class="login-header">
+      <h1 class="login-title">
+        <i class="fas fa-sign-in-alt"></i> Вход в систему
+      </h1>
+      <p class="login-subtitle">
+        Добро пожаловать обратно в Online School
+      </p>
+    </div>
+
+    <div class="login-body">
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-4">
+          <label for="username" class="form-label">
+            <i class="fas fa-user"></i> Имя пользователя
+          </label>
+          <input type="text" name="username" id="username"
+                 class="form-control" required
+                 placeholder="Введите имя пользователя">
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="form-label">
+            <i class="fas fa-lock"></i> Пароль
+          </label>
+          <input type="password" name="password" id="password"
+                 class="form-control" required
+                 placeholder="Введите пароль">
+        </div>
+
+        <div class="login-options">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="remember">
+            <label class="form-check-label" for="remember">
+              Запомнить меня
+            </label>
+          </div>
+
+          <a href="#" class="forgot-password">
+            <i class="fas fa-key"></i> Забыли пароль?
+          </a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-login w-100 mt-4">
+          <i class="fas fa-sign-in-alt"></i> Войти
+        </button>
+      </form>
+
+      <div class="register-link">
+        <p>Еще нет аккаунта?
+          <a href="{% url 'register' %}" style="color: var(--primary-color); font-weight: 600;">
+            <i class="fas fa-user-plus"></i> Зарегистрироваться
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

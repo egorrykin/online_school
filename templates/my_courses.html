@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои курсы - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .courses-container {
+    margin-top: 2rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid #f0f0f0;
+    color: var(--primary-color);
+  }
+
+  .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .course-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    background: white;
+  }
+
+  .course-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  }
+
+  .course-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .course-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .course-teacher {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  .course-body {
+    padding: 1.5rem;
+  }
+
+  .course-description {
+    color: #666;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    height: 60px;
+    overflow: hidden;
+  }
+
+  .course-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+    background: #f8f9fa;
+    border-radius: 15px;
+    margin: 2rem 0;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.3;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #495057;
+  }
+
+  .empty-state p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .create-course-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .create-course-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    color: white;
+  }
+
+  .enroll-btn {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .enroll-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+    color: white;
+  }
+
+  .view-btn {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .view-btn:hover {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .badge {
+    padding: 0.35em 0.65em;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: 600;
+  }
+
+  .badge-teacher {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+
+  .badge-student {
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+  }
+
+  .tab-content {
+    margin-top: 2rem;
+  }
+
+  .nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+  }
+
+  .nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px 10px 0 0;
+    margin-right: 0.5rem;
+  }
+
+  .nav-tabs .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .nav-tabs .nav-link:hover {
+    border: none;
+    color: var(--primary-color);
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container courses-container">
+  <!-- Заголовок -->
+  <div class="row mb-5">
+    <div class="col-md-8">
+      <h1 class="mb-3">
+        {% if is_teacher %}
+        <i class="fas fa-chalkboard-teacher"></i> Мои курсы (Преподаватель)
+        {% else %}
+        <i class="fas fa-user-graduate"></i> Мои курсы (Ученик)
+        {% endif %}
+      </h1>
+      <p class="lead">
+        {% if is_teacher %}
+        Здесь вы видите все курсы, которые вы ведете. Создавайте новые курсы и управляйте существующими.
+        {% else %}
+        Здесь вы видите все курсы, на которые вы записаны. Изучайте материалы и выполняйте задания.
+        {% endif %}
+      </p>
+    </div>
+    <div class="col-md-4 text-end">
+      {% if is_teacher %}
+      <a href="{% url 'create_course' %}" class="create-course-btn">
+        <i class="fas fa-plus-circle"></i> Создать новый курс
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Вкладки -->
+  <ul class="nav nav-tabs" id="coursesTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="my-courses-tab" data-bs-toggle="tab" data-bs-target="#my-courses" type="button">
+        <i class="fas fa-book"></i> Мои курсы
+        <span class="badge bg-primary ms-1">{{ courses.count }}</span>
+      </button>
+    </li>
+    {% if not is_teacher and available_courses %}
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="available-courses-tab" data-bs-toggle="tab" data-bs-target="#available-courses" type="button">
+        <i class="fas fa-search"></i> Доступные курсы
+        <span class="badge bg-info ms-1">{{ available_courses.count }}</span>
+      </button>
+    </li>
+    {% endif %}
+  </ul>
+
+  <!-- Содержимое вкладок -->
+  <div class="tab-content" id="coursesTabContent">
+    <!-- Мои курсы -->
+    <div class="tab-pane fade show active" id="my-courses" role="tabpanel">
+      {% if courses %}
+      <div class="courses-grid">
+        {% for course in courses %}
+        <div class="course-card">
+          <div class="course-header">
+            <h3 class="course-title">{{ course.title }}</h3>
+            <div class="course-teacher">
+              <i class="fas fa-chalkboard-teacher"></i>
+              {% if is_teacher %}
+              Вы - преподаватель
+              {% else %}
+              {{ course.teacher.get_full_name|default:course.teacher.username }}
+              {% endif %}
+            </div>
+            <div class="course-stats">
+              <span><i class="fas fa-users"></i> {{ course.students.count }} учеников</span>
+              <span><i class="fas fa-tasks"></i> {{ course.assignments.count }} заданий</span>
+            </div>
+          </div>
+          <div class="course-body">
+            <p class="course-description">
+              {{ course.description|truncatechars:150 }}
+            </p>
+            <div class="course-actions">
+                            <span class="text-muted small">
+                                <i class="far fa-calendar"></i> Создан: {{ course.created_at|date:"d.m.Y" }}
+                            </span>
+              {% if course.id %}
+              <a href="{% url 'course_detail' course.id %}" class="view-btn">
+                <i class="fas fa-eye"></i> Подробнее
+              </a>
+              {% else %}
+              <button class="view-btn" disabled>
+                <i class="fas fa-eye"></i> Подробнее
+              </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        {% if is_teacher %}
+        <i class="fas fa-book-open"></i>
+        <h3>У вас пока нет курсов</h3>
+        <p>Создайте свой первый курс и начните обучение учеников. Это просто и займет всего несколько минут.</p>
+        <a href="{% url 'create_course' %}" class="create-course-btn">
+          <i class="fas fa-plus-circle"></i> Создать первый курс
+        </a>
+        {% else %}
+        <i class="fas fa-book-open"></i>
+        <h3>Вы еще не записаны на курсы</h3>
+        <p>Найдите интересные курсы в разделе "Доступные курсы" и начните обучение.</p>
+        {% if available_courses %}
+        <button class="create-course-btn" data-bs-toggle="tab" data-bs-target="#available-courses">
+          <i class="fas fa-search"></i> Найти курсы
+        </button>
+        {% endif %}
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Доступные курсы (только для учеников) -->
+    {% if not is_teacher and available_courses %}
+    <div class="tab-pane fade" id="available-courses" role="tabpanel">
+      {% if available_courses %}
+      <div class="courses-grid">
+        {% for course in available_courses %}
+        <div class="course-card">
+          <div class="course-header">
+            <h3 class="course-title">{{ course.title }}</h3>
+            <div class="course-teacher">
+              <i class="fas fa-chalkboard-teacher"></i>
+              {{ course.teacher.get_full_name|default:course.teacher.username }}
+            </div>
+            <div class="course-stats">
+              <span><i class="fas fa-users"></i> {{ course.students.count }} учеников</span>
+              <span><i class="fas fa-tasks"></i> {{ course.assignments.count }} заданий</span>
+            </div>
+          </div>
+          <div class="course-body">
+            <p class="course-description">
+              {{ course.description|truncatechars:150 }}
+            </p>
+            <div class="course-actions">
+                            <span class="text-muted small">
+                                <i class="far fa-calendar"></i> Создан: {{ course.created_at|date:"d.m.Y" }}
+                            </span>
+              <form method="post" action="{% url 'enroll_course' course.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="enroll-btn">
+                  <i class="fas fa-user-plus"></i> Записаться
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <h3>Нет доступных курсов</h3>
+        <p>Все курсы в данный момент заполнены или находятся на модерации.</p>
+        <p class="small text-muted">Попробуйте зайти позже или обратитесь к администратору.</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Статистика (для учителей) -->
+  {% if is_teacher and courses %}
+  <div class="card mt-5">
+    <div class="card-header">
+      <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Статистика моих курсов</h4>
+    </div>
+    <div class="card-body">
+      <div class="row text-center">
+        <div class="col-md-3">
+          <div class="stat-number" style="font-size: 2rem; color: var(--primary-color);">
+            {{ courses.count }}
+          </div>
+          <div class="stat-label">Всего курсов</div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-number" style="font-size: 2rem; color: var(--success-color);">
+            {% with total_students=0 %}
+            {% for course in courses %}
+            {% with total_students=total_students|add:course.students.count %}
+            {% endwith %}
+            {% endfor %}
+            {{ total_students }}
+            {% endwith %}
+          </div>
+          <div class="stat-label">Всего учеников</div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-number" style="font-size: 2rem; color: var(--info-color);">
+            {% with total_assignments=0 %}
+            {% for course in courses %}
+            {% with total_assignments=total_assignments|add:course.assignments.count %}
+            {% endwith %}
+            {% endfor %}
+            {{ total_assignments }}
+            {% endwith %}
+          </div>
+          <div class="stat-label">Всего заданий</div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-number" style="font-size: 2rem; color: var(--warning-color);">
+            {{ courses.count }}
+          </div>
+          <div class="stat-label">Активных курсов</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация вкладок
+    const triggerTabList = document.querySelectorAll('#coursesTab button');
+    triggerTabList.forEach(triggerEl => {
+      const tabTrigger = new bootstrap.Tab(triggerEl);
+      triggerEl.addEventListener('click', event => {
+        event.preventDefault();
+        tabTrigger.show();
+      });
+    });
+
+    // Подтверждение записи на курс
+    const enrollForms = document.querySelectorAll('form[action*="enroll_course"]');
+    enrollForms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const courseTitle = this.closest('.course-card').querySelector('.course-title').textContent;
+        if (!confirm(`Вы уверены, что хотите записаться на курс "${courseTitle.trim()}"?`)) {
+          e.preventDefault();
+        }
+      });
+    });
+
+    // Анимация карточек при загрузке
+    const courseCards = document.querySelectorAll('.course-card');
+    courseCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+
+      setTimeout(() => {
+        card.style.transition = 'all 0.5s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 100);
+    });
+
+    // Подсветка активной вкладки
+    const tabButtons = document.querySelectorAll('.nav-tabs .nav-link');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Анимация статистики
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+      const text = stat.textContent;
+      if (text && /\d+/.test(text)) {
+        const target = parseInt(text.replace(/[^\d]/g, ''));
+        let current = 0;
+        const increment = target / 30;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          stat.textContent = Math.round(current);
+        }, 50);
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

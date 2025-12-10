@@ -1,0 +1,685 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .course-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+  }
+
+  .course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .course-meta {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .meta-item i {
+    font-size: 1.2rem;
+  }
+
+  .section-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .assignment-card {
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+  }
+
+  .assignment-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+
+  .assignment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .assignment-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .assignment-meta {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .assignment-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .status-draft {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+
+  .status-published {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+  }
+
+  .status-closed {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  .due-date {
+    font-weight: 600;
+  }
+
+  .due-date.upcoming {
+    color: #28a745;
+  }
+
+  .due-date.overdue {
+    color: #dc3545;
+  }
+
+  .student-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .student-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: background-color 0.3s;
+  }
+
+  .student-card:hover {
+    background: #e9ecef;
+  }
+
+  .student-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .student-info h6 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+
+  .student-email {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .announcement-card {
+    border-left: 4px solid var(--primary-color);
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .announcement-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .announcement-content {
+    color: #333;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .announcement-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .description-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .description-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+  }
+
+  .description-content {
+    line-height: 1.8;
+    color: #333;
+    white-space: pre-line;
+  }
+
+  .tab-content {
+    background: white;
+    border-radius: 0 0 15px 15px;
+    padding: 2rem;
+    border: 1px solid #dee2e6;
+    border-top: none;
+  }
+
+  .nav-tabs .nav-link {
+    border-radius: 10px 10px 0 0;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+  }
+
+  .nav-tabs .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Заголовок курса -->
+  <div class="course-header">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb" style="background: rgba(255,255,255,0.1); padding: 0.75rem; border-radius: 10px;">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" style="color: white;">Панель управления</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'my_courses' %}" style="color: white;">Мои курсы</a></li>
+        <li class="breadcrumb-item active" style="color: white;">{{ course.title|truncatechars:30 }}</li>
+      </ol>
+    </nav>
+
+    <h1 class="course-title">{{ course.title }}</h1>
+
+    <div class="course-meta">
+      <div class="meta-item">
+        <i class="fas fa-chalkboard-teacher"></i>
+        <span>Преподаватель: <strong>{{ course.teacher.get_full_name|default:course.teacher.username }}</strong></span>
+      </div>
+      <div class="meta-item">
+        <i class="fas fa-users"></i>
+        <span>Учеников: <strong>{{ students.count }}</strong></span>
+      </div>
+      <div class="meta-item">
+        <i class="fas fa-tasks"></i>
+        <span>Заданий: <strong>{{ assignments.count }}</strong></span>
+      </div>
+      <div class="meta-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Создан: <strong>{{ course.created_at|date:"d.m.Y" }}</strong></span>
+      </div>
+    </div>
+
+    {% if user.profile.role == 'teacher' %}
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Статистика курса</h5>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-md-3">
+            <div class="stat-number" style="font-size: 2rem; color: var(--primary-color);">
+              {{ students.count }}
+            </div>
+            <div class="stat-label">Всего учеников</div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-number" style="font-size: 2rem; color: var(--success-color);">
+              {{ total_submissions }}
+            </div>
+            <div class="stat-label">Всего решений</div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-number" style="font-size: 2rem; color: var(--info-color);">
+              {{ assignments.count }}
+            </div>
+            <div class="stat-label">Всего заданий</div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-number" style="font-size: 2rem; color: var(--warning-color);">
+              {{ graded_submissions }}
+            </div>
+            <div class="stat-label">Проверено</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Описание курса -->
+  <div class="description-section">
+    <h2 class="description-title"><i class="fas fa-info-circle"></i> Описание курса</h2>
+    <div class="description-content">
+      {{ course.description|linebreaks }}
+    </div>
+  </div>
+
+  <!-- Вкладки -->
+  <ul class="nav nav-tabs" id="courseTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="assignments-tab" data-bs-toggle="tab" data-bs-target="#assignments" type="button">
+        <i class="fas fa-tasks"></i> Задания
+        <span class="badge bg-primary ms-1">{{ assignments.count }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements" type="button">
+        <i class="fas fa-bullhorn"></i> Объявления
+        <span class="badge bg-primary ms-1">{{ announcements.count }}</span>
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button">
+        <i class="fas fa-users"></i> Ученики
+        <span class="badge bg-primary ms-1">{{ students.count }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <!-- Содержимое вкладок -->
+  <div class="tab-content" id="courseTabsContent">
+    <!-- Вкладка Задания -->
+    <div class="tab-pane fade show active" id="assignments" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Задания курса</h3>
+        {% if user.profile.role == 'teacher' %}
+        <a href="{% url 'create_assignment_for_course' course.id %}" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Новое задание
+        </a>
+        {% endif %}
+      </div>
+
+      {% if assignments %}
+      <div class="assignments-list">
+        {% for assignment in assignments %}
+        <div class="assignment-card">
+          <div class="assignment-header">
+            <div style="flex: 1;">
+              <h4 class="assignment-title">{{ assignment.title }}</h4>
+              <div class="assignment-meta">
+                                <span class="me-3">
+                                    <i class="far fa-clock"></i> 
+                                    <span class="due-date {% if assignment.is_overdue %}overdue{% else %}upcoming{% endif %}">
+                                        {% if assignment.due_date %}
+                                            Срок: {{ assignment.due_date|date:"d.m.Y H:i" }}
+                                        {% else %}
+                                            Срок не указан
+                                        {% endif %}
+                                    </span>
+                                </span>
+                <span>
+                                    <i class="fas fa-star"></i> Макс. балл: {{ assignment.max_points }}
+                                </span>
+              </div>
+              {% if assignment.description %}
+              <p class="mt-2">{{ assignment.description|truncatechars:150 }}</p>
+              {% endif %}
+            </div>
+            <div>
+                            <span class="assignment-status status-{{ assignment.status }}">
+                                {{ assignment.get_status_display }}
+                            </span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              {% if assignment.status == 'published' %}
+              <span class="badge bg-info">
+                                <i class="fas fa-paper-plane"></i> 
+                                Решений: {{ assignment.submissions.count }}
+                            </span>
+              {% endif %}
+            </div>
+            <div>
+              <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-eye"></i> Подробнее
+              </a>
+              {% if user.profile.role == 'teacher' and assignment.submissions.count > 0 %}
+              <a href="{% url 'submissions_list' assignment.id %}" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-check-circle"></i> Проверить
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-tasks"></i>
+        <h4>Заданий пока нет</h4>
+        <p>{% if user.profile.role == 'teacher' %}Создайте первое задание для этого курса{% else %}Преподаватель еще не добавил задания{% endif %}</p>
+        {% if user.profile.role == 'teacher' %}
+        <a href="{% url 'create_assignment_for_course' course.id %}" class="btn btn-primary">
+          <i class="fas fa-plus-circle"></i> Создать задание
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Вкладка Объявления -->
+    <div class="tab-pane fade" id="announcements" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Объявления курса</h3>
+        {% if user.profile.role == 'teacher' %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#announcementModal">
+          <i class="fas fa-plus"></i> Новое объявление
+        </button>
+        {% endif %}
+      </div>
+
+      {% if announcements %}
+      <div class="announcements-list">
+        {% for announcement in announcements %}
+        <div class="announcement-card">
+          <h5 class="announcement-title">{{ announcement.title }}</h5>
+          <div class="announcement-content">
+            {{ announcement.content|linebreaks }}
+          </div>
+          <div class="announcement-meta">
+                        <span>
+                            <i class="fas fa-user"></i> {{ announcement.author.get_full_name|default:announcement.author.username }}
+                        </span>
+            <span>
+                            <i class="far fa-clock"></i> {{ announcement.created_at|date:"d.m.Y H:i" }}
+                        </span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-bullhorn"></i>
+        <h4>Объявлений пока нет</h4>
+        <p>{% if user.profile.role == 'teacher' %}Создайте первое объявление для учеников{% else %}Преподаватель пока не публиковал объявлений{% endif %}</p>
+        {% if user.profile.role == 'teacher' %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#announcementModal">
+          <i class="fas fa-bullhorn"></i> Создать объявление
+        </button>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Вкладка Ученики -->
+    <!-- Вкладка Ученики - исправленный блок -->
+    <div class="tab-pane fade" id="students" role="tabpanel">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Ученики курса</h3>
+        {% if user.profile.role == 'teacher' %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#studentModal">
+          <i class="fas fa-user-plus"></i> Добавить ученика
+        </button>
+        {% endif %}
+      </div>
+
+      {% if students %}
+      <div class="student-list">
+        {% for student in students %}
+        <div class="student-card">
+          <div class="student-avatar">
+            {{ student.first_name|first|upper }}{{ student.last_name|first|upper }}
+          </div>
+          <div class="student-info">
+            <h6 class="mb-1">{{ student.get_full_name|default:student.username }}</h6>
+            <p class="student-email mb-1">{{ student.email }}</p>
+            <small class="text-muted">
+              Заданий выполнено: {{ student.submissions.count }}
+            </small>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Статистика для учителей -->
+      {% if is_teacher and courses %}
+      <div class="card mt-5">
+        <div class="card-header">
+          <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Статистика моих курсов</h4>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-3">
+              <div class="stat-number" style="font-size: 2rem; color: var(--primary-color);">
+                {{ courses.count }}
+              </div>
+              <div class="stat-label">Всего курсов</div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-number" style="font-size: 2rem; color: var(--success-color);">
+                {% with total_students=0 %}
+                {% for course in courses %}
+                {{ total_students|add:course.students.count }}
+                {% endfor %}
+                {% endwith %}
+              </div>
+              <div class="stat-label">Всего учеников</div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-number" style="font-size: 2rem; color: var(--info-color);">
+                {% with total_assignments=0 %}
+                {% for course in courses %}
+                {{ total_assignments|add:course.assignments.count }}
+                {% endfor %}
+                {% endwith %}
+              </div>
+              <div class="stat-label">Всего заданий</div>
+            </div>
+            <div class="col-md-3">
+              <div class="stat-number" style="font-size: 2rem; color: var(--warning-color);">
+                {{ courses.count }}
+              </div>
+              <div class="stat-label">Активных курсов</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <h4>Учеников пока нет</h4>
+        <p>{% if user.profile.role == 'teacher' %}Добавьте учеников в этот курс{% else %}На этом курсе пока нет других учеников{% endif %}</p>
+        {% if user.profile.role == 'teacher' %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#studentModal">
+          <i class="fas fa-user-plus"></i> Добавить ученика
+        </button>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для создания объявления -->
+<div class="modal fade" id="announcementModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-bullhorn"></i> Новое объявление</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="{% url 'course_detail' course.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Заголовок объявления</label>
+            <input type="text" name="title" class="form-control" required
+                   placeholder="Введите заголовок объявления" maxlength="200">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Содержание объявления</label>
+            <textarea name="content" class="form-control" rows="6" required
+                      placeholder="Введите текст объявления..."></textarea>
+            <div class="form-text">
+              Объявление будет видно всем ученикам курса.
+            </div>
+          </div>
+          <input type="hidden" name="course_id" value="{{ course.id }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary">Опубликовать объявление</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно для добавления ученика -->
+{% if user.profile.role == 'teacher' %}
+<div class="modal fade" id="studentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-user-plus"></i> Добавить ученика в курс</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i>
+          Функция добавления учеников находится в разработке.
+          Пока что ученики могут записываться на курсы самостоятельно через страницу "Мои курсы".
+        </div>
+        <p class="text-muted">
+          Скоро вы сможете добавлять учеников по email или имени пользователя.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <a href="{% url 'my_courses' %}" class="btn btn-primary">
+          <i class="fas fa-external-link-alt"></i> Перейти к списку курсов
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация вкладок
+    const triggerTabList = document.querySelectorAll('#courseTabs button');
+    triggerTabList.forEach(triggerEl => {
+      const tabTrigger = new bootstrap.Tab(triggerEl);
+      triggerEl.addEventListener('click', event => {
+        event.preventDefault();
+        tabTrigger.show();
+      });
+    });
+
+    // Активируем первую вкладку
+    const firstTabEl = document.querySelector('#courseTabs button:first-child');
+    if (firstTabEl) {
+      const firstTab = new bootstrap.Tab(firstTabEl);
+      // Уже активирована по умолчанию
+    }
+
+    // Подсветка просроченных заданий
+    const dueDates = document.querySelectorAll('.due-date');
+    dueDates.forEach(dueDate => {
+      if (dueDate.classList.contains('overdue')) {
+        dueDate.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + dueDate.innerHTML;
+      }
+    });
+
+    // Обновление счетчиков при добавлении контента
+    function updateCounters() {
+      // Можно добавить AJAX обновление при необходимости
+      console.log('Counters updated');
+    }
+
+    // Инициализация всех тултипов
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => {
+      new bootstrap.Tooltip(tooltip);
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

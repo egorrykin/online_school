@@ -1,0 +1,729 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель ученика - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+  }
+
+  .welcome-message h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-message p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .assignment-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    border-left: 4px solid;
+    transition: all 0.3s;
+  }
+
+  .assignment-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  .assignment-item.active {
+    border-left-color: #4facfe;
+  }
+
+  .assignment-item.overdue {
+    border-left-color: #dc3545;
+  }
+
+  .assignment-item.completed {
+    border-left-color: #28a745;
+  }
+
+  .assignment-info h5 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .assignment-meta {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .assignment-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .grade-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: inline-block;
+  }
+
+  .grade-excellent {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+  }
+
+  .grade-good {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+
+  .grade-average {
+    background: rgba(253, 126, 20, 0.1);
+    color: #fd7e14;
+  }
+
+  .grade-poor {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  .course-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s;
+    height: 100%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  }
+
+  .course-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1.5rem;
+  }
+
+  .course-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .teacher-info {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  .progress-section {
+    margin-top: 1rem;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .quick-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .submission-item {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #28a745;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  }
+
+  .submission-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .submission-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .alert-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .card {
+    position: relative;
+    overflow: visible;
+  }
+
+  .overdue-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Заголовок -->
+  <div class="dashboard-header">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="welcome-message">
+          <h1>👋 Привет, {{ user.get_full_name|default:user.username }}!</h1>
+          <p>Панель управления ученика - отслеживайте свои курсы, задания и успеваемость.</p>
+        </div>
+        <div class="quick-actions">
+          <a href="{% url 'my_courses' %}" class="btn btn-light">
+            <i class="fas fa-book"></i> Мои курсы
+          </a>
+          {% if active_assignments or overdue_assignments %}
+          <a href="#active-assignments" class="btn btn-outline-light">
+            <i class="fas fa-tasks"></i>
+            {% if active_assignments %}
+            Активные: {{ active_assignments.count }}
+            {% endif %}
+            {% if overdue_assignments %}
+            <span class="badge bg-danger ms-1">Просрочено: {{ overdue_assignments.count }}</span>
+            {% endif %}
+          </a>
+          {% endif %}
+          <a href="{% url 'profile' %}" class="btn btn-outline-light">
+            <i class="fas fa-user"></i> Мой профиль
+          </a>
+        </div>
+      </div>
+      <div class="col-md-4 text-center">
+        <i class="fas fa-user-graduate" style="font-size: 6rem; opacity: 0.8;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Быстрая статистика -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+        <i class="fas fa-book"></i>
+      </div>
+      <div class="stat-number">{{ courses.count }}</div>
+      <div class="stat-label">Мои курсы</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <div class="stat-number">
+        {% if active_assignments %}
+        {{ active_assignments.count }}
+        {% else %}
+        0
+        {% endif %}
+      </div>
+      <div class="stat-label">Активные задания</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-number">
+        {% if recent_submissions %}
+        {{ recent_submissions.count }}
+        {% else %}
+        0
+        {% endif %}
+      </div>
+      <div class="stat-label">Сданные работы</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-number">
+        {% if grades %}
+        {% with grades|first as first_grade %}
+        {{ first_grade.avg_grade|floatformat:0 }}%
+        {% endwith %}
+        {% else %}
+        0%
+        {% endif %}
+      </div>
+      <div class="stat-label">Средняя оценка</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Активные задания -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-tasks"></i> Активные задания
+            {% if overdue_assignments %}
+            <span class="overdue-badge">
+                            Просрочено: {{ overdue_assignments.count }}
+                        </span>
+            {% endif %}
+          </h3>
+
+          {% if active_assignments or overdue_assignments %}
+          <div id="active-assignments">
+            <!-- Просроченные задания -->
+            {% for assignment in overdue_assignments|slice:":3" %}
+            <div class="assignment-item overdue">
+              <div class="assignment-info">
+                <h5>{{ assignment.title|truncatechars:40 }}</h5>
+                <p class="assignment-meta">
+                  <i class="fas fa-book"></i> {{ assignment.course.title }}
+                  <br>
+                  <i class="far fa-calendar-times text-danger"></i>
+                  Просрочено: {{ assignment.due_date|date:"d.m.Y H:i" }}
+                </p>
+              </div>
+              <div class="assignment-actions mt-2">
+                <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-danger btn-sm">
+                  <i class="fas fa-exclamation-circle"></i> Срочно сдать
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!-- Активные задания -->
+            {% for assignment in active_assignments|slice:":5" %}
+            <div class="assignment-item active">
+              <div class="assignment-info">
+                <h5>{{ assignment.title|truncatechars:40 }}</h5>
+                <p class="assignment-meta">
+                  <i class="fas fa-book"></i> {{ assignment.course.title }}
+                  <br>
+                  <i class="far fa-clock"></i> До: {{ assignment.due_date|date:"d.m.Y H:i" }}
+                </p>
+              </div>
+              <div class="assignment-actions mt-2">
+                <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-paper-plane"></i> Сдать работу
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if active_assignments.count > 5 or overdue_assignments.count > 3 %}
+          <div class="text-center mt-3">
+            <a href="#" class="btn btn-outline-primary">
+              <i class="fas fa-list"></i> Показать все задания
+            </a>
+          </div>
+          {% endif %}
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h5>Нет активных заданий</h5>
+            <p>Отличная работа! Все задания выполнены вовремя.</p>
+            <a href="{% url 'my_courses' %}" class="btn btn-primary">
+              <i class="fas fa-book"></i> Перейти к курсам
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Мои курсы -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-book"></i> Мои курсы
+            <a href="{% url 'my_courses' %}" class="btn btn-primary btn-sm float-end">
+              <i class="fas fa-plus"></i> Записаться
+            </a>
+          </h3>
+
+          {% if courses %}
+          <div class="row">
+            {% for course in courses|slice:":4" %}
+            <div class="col-md-6 mb-3">
+              <div class="course-card">
+                <div class="course-header">
+                  <h5 class="course-title">{{ course.title|truncatechars:30 }}</h5>
+                  <p class="teacher-info mb-0">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    {{ course.teacher.get_full_name|default:course.teacher.username }}
+                  </p>
+                </div>
+                <div class="card-body">
+                  <p class="card-text small">{{ course.description|truncatechars:80 }}</p>
+                  <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-info">
+                                            {{ course.assignments.count }} заданий
+                                        </span>
+                    {% if course.id %}
+                    <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-primary btn-sm">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    {% else %}
+                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if courses.count > 4 %}
+          <div class="text-center mt-3">
+            <a href="{% url 'my_courses' %}" class="btn btn-outline-primary">
+              <i class="fas fa-list"></i> Все курсы ({{ courses.count }})
+            </a>
+          </div>
+          {% endif %}
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-book-open"></i>
+            <h5>Вы еще не записаны на курсы</h5>
+            <p>Найдите интересные курсы и начните обучение</p>
+            <a href="{% url 'my_courses' %}" class="btn btn-primary">
+              <i class="fas fa-search"></i> Найти курсы
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Последние оценки -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-star"></i> Последние оценки
+          </h3>
+
+          {% if recent_submissions %}
+          <div class="submission-list">
+            {% for submission in recent_submissions|slice:":5" %}
+            <div class="submission-item">
+              <div class="submission-info">
+                <h6 class="submission-title">{{ submission.assignment.title|truncatechars:40 }}</h6>
+                <p class="submission-meta">
+                  <i class="fas fa-book"></i> {{ submission.assignment.course.title }}
+                  <br>
+                  <i class="far fa-clock"></i> Сдано: {{ submission.submitted_at|date:"d.m.Y H:i" }}
+                </p>
+              </div>
+              <div class="mt-2">
+                {% if submission.grade %}
+                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="grade-badge
+                                        {% if submission.get_grade_percentage >= 90 %}grade-excellent
+                                        {% elif submission.get_grade_percentage >= 75 %}grade-good
+                                        {% elif submission.get_grade_percentage >= 60 %}grade-average
+                                        {% else %}grade-poor{% endif %}">
+                                        {{ submission.grade }}/{{ submission.assignment.max_points }}
+                                    </span>
+                  {% if submission.feedback %}
+                  <button class="btn btn-sm btn-outline-info"
+                          data-bs-toggle="tooltip"
+                          title="{{ submission.feedback }}">
+                    <i class="fas fa-comment"></i> Комментарий
+                  </button>
+                  {% endif %}
+                </div>
+                {% else %}
+                <span class="badge bg-warning">
+                                    <i class="fas fa-clock"></i> На проверке
+                                </span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-star"></i>
+            <h5>Нет оценок</h5>
+            <p>Вы еще не сдали ни одной работы</p>
+            {% if active_assignments %}
+            <a href="#active-assignments" class="btn btn-primary">
+              <i class="fas fa-tasks"></i> Посмотреть задания
+            </a>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Успеваемость -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-chart-line"></i> Успеваемость
+          </h3>
+
+          {% if grades %}
+          <div class="grades-list">
+            {% for grade in grades|slice:":5" %}
+            <div class="progress-section">
+              <div class="progress-label">
+                <span>{{ grade.assignment__course__title|truncatechars:30 }}</span>
+                <span>{{ grade.avg_grade|floatformat:0 }}%</span>
+              </div>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar
+                                    {% if grade.avg_grade >= 90 %}bg-success
+                                    {% elif grade.avg_grade >= 75 %}bg-info
+                                    {% elif grade.avg_grade >= 60 %}bg-warning
+                                    {% else %}bg-danger{% endif %}"
+                     role="progressbar"
+                     style="width: {{ grade.avg_grade }}%"
+                     aria-valuenow="{{ grade.avg_grade }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h5>Нет данных об успеваемости</h5>
+            <p>Начните выполнять задания и отслеживать свой прогресс</p>
+          </div>
+          {% endif %}
+
+          <!-- Общая статистика -->
+          <div class="mt-4">
+            <div class="row text-center">
+              <div class="col-4">
+                <div class="stat-number" style="font-size: 1.5rem;">
+                  {{ courses.count }}
+                </div>
+                <div class="stat-label">Курсов</div>
+              </div>
+              <div class="col-4">
+                <div class="stat-number" style="font-size: 1.5rem;">
+                  {% if active_assignments %}
+                  {{ active_assignments.count }}
+                  {% else %}
+                  0
+                  {% endif %}
+                </div>
+                <div class="stat-label">Активных</div>
+              </div>
+              <div class="col-4">
+                <div class="stat-number" style="font-size: 1.5rem;">
+                  {% if recent_submissions %}
+                  {{ recent_submissions.count }}
+                  {% else %}
+                  0
+                  {% endif %}
+                </div>
+                <div class="stat-label">Сдано</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Мотивационное сообщение -->
+          <div class="mt-4 pt-3 border-top">
+            <div class="alert alert-info">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-lightbulb fa-2x me-3"></i>
+                <div>
+                  <h6 class="mb-1">Совет дня:</h6>
+                  <p class="mb-0 small">
+                    {% if active_assignments %}
+                    У вас есть активные задания. Не откладывайте их выполнение!
+                    {% elif recent_submissions %}
+                    Отличная работа! Продолжайте в том же духе.
+                    {% else %}
+                    Начните обучение с выполнения первого задания.
+                    {% endif %}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация тултипов
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => {
+      new bootstrap.Tooltip(tooltip);
+    });
+
+    // Расчет процента оценки
+    const gradeBadges = document.querySelectorAll('.grade-badge');
+    gradeBadges.forEach(badge => {
+      const text = badge.textContent;
+      const match = text.match(/(\d+)\/(\d+)/);
+      if (match) {
+        const grade = parseInt(match[1]);
+        const max = parseInt(match[2]);
+        const percentage = (grade / max) * 100;
+
+        // Добавляем процент к тексту
+        badge.innerHTML = `${text} <small>(${percentage.toFixed(0)}%)</small>`;
+      }
+    });
+
+    // Анимация статистики
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+      const text = stat.textContent;
+      if (text && /\d+/.test(text)) {
+        const target = parseInt(text.replace(/[^\d]/g, ''));
+        let current = 0;
+        const increment = target / 30;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          stat.textContent = Math.round(current) + (text.replace(/\d+/g, '') || '');
+        }, 50);
+      }
+    });
+
+    // Подсветка просроченных заданий
+    const overdueItems = document.querySelectorAll('.assignment-item.overdue');
+    overdueItems.forEach(item => {
+      item.addEventListener('mouseenter', function() {
+        this.style.boxShadow = '0 5px 20px rgba(220, 53, 69, 0.2)';
+      });
+      item.addEventListener('mouseleave', function() {
+        this.style.boxShadow = '0 3px 10px rgba(0,0,0,0.05)';
+      });
+    });
+
+    // Обновление счетчика активных заданий
+    function updateAssignmentCount() {
+      // Здесь можно добавить AJAX запрос для получения актуального количества
+      console.log('Dashboard loaded successfully');
+    }
+
+    // Инициализация
+    updateAssignmentCount();
+  });
+</script>
+{% endblock %}

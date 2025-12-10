@@ -1,0 +1,543 @@
+{% extends 'base.html' %}
+
+{% block title %}Создать задание - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .create-assignment-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .create-assignment-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  .create-assignment-header {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .create-assignment-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-assignment-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .create-assignment-body {
+    padding: 3rem;
+    background: white;
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+  }
+
+  .course-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .course-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+  }
+
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .form-control, .form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(74, 107, 223, 0.25);
+  }
+
+  .character-counter {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-align: right;
+    margin-top: 0.25rem;
+  }
+
+  .btn-create-assignment {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .help-tips {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .help-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+  }
+
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tip-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-assignment-container fade-in">
+  <div class="create-assignment-card">
+    <div class="create-assignment-header">
+      <h1 class="create-assignment-title">
+        <i class="fas fa-plus-circle"></i>
+        {% if selected_course %}
+        Создать задание для курса
+        {% else %}
+        Создать новое задание
+        {% endif %}
+      </h1>
+      <p class="create-assignment-subtitle">
+        {% if selected_course %}
+        Добавьте задание для курса "{{ selected_course.title }}"
+        {% else %}
+        Создайте задание для одного из ваших курсов
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="create-assignment-body">
+      {% if selected_course %}
+      <div class="course-info">
+        <h3 class="course-title">{{ selected_course.title }}</h3>
+        <p class="mb-2">{{ selected_course.description|truncatechars:150 }}</p>
+        <div class="text-muted">
+          <i class="fas fa-users"></i> {{ selected_course.students.count }} учеников
+        </div>
+      </div>
+      {% endif %}
+
+      <form method="post" id="createAssignmentForm">
+        {% csrf_token %}
+
+        <!-- Основная информация -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-info-circle"></i> Основная информация
+          </h3>
+
+          {% if not selected_course %}
+          <div class="mb-4">
+            <label for="id_course" class="form-label">
+              <i class="fas fa-book"></i> Выберите курс
+            </label>
+            {{ form.course }}
+            {% if form.course.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.course.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% else %}
+          <input type="hidden" name="course" value="{{ selected_course.id }}">
+          {% endif %}
+
+          <div class="mb-4">
+            <label for="id_title" class="form-label">
+              <i class="fas fa-heading"></i> Название задания
+            </label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.title.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+            <div class="character-counter" id="title-counter">
+              <span id="title-length">0</span>/200 символов
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="id_description" class="form-label">
+              <i class="fas fa-align-left"></i> Описание задания
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.description.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+            <div class="character-counter" id="description-counter">
+              <span id="description-length">0</span>/5000 символов
+            </div>
+          </div>
+        </div>
+
+        <!-- Детали задания -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <i class="fas fa-cog"></i> Детали задания
+          </h3>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="id_due_date" class="form-label">
+                <i class="fas fa-calendar-alt"></i> Срок сдачи
+              </label>
+              {{ form.due_date }}
+              {% if form.due_date.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.due_date.errors %}
+                {{ error }}
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="id_max_points" class="form-label">
+                <i class="fas fa-star"></i> Максимальный балл
+              </label>
+              {{ form.max_points }}
+              {% if form.max_points.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.max_points.errors %}
+                {{ error }}
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="id_status" class="form-label">
+              <i class="fas fa-toggle-on"></i> Статус задания
+            </label>
+            {{ form.status }}
+            {% if form.status.errors %}
+            <div class="text-danger small mt-1">
+              {% for error in form.status.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
+            <div class="form-text">
+              <strong>Черновик</strong> - виден только вам.<br>
+              <strong>Опубликовано</strong> - видят все ученики курса.<br>
+              <strong>Закрыто</strong> - задание завершено, новые решения не принимаются.
+            </div>
+          </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-create-assignment">
+            <i class="fas fa-plus-circle"></i> Создать задание
+          </button>
+          {% if selected_course %}
+          <a href="{% url 'course_detail' selected_course.id %}" class="btn btn-outline-secondary" style="padding: 1rem 2rem;">
+            <i class="fas fa-times"></i> Отмена
+          </a>
+          {% else %}
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary" style="padding: 1rem 2rem;">
+            <i class="fas fa-times"></i> Отмена
+          </a>
+          {% endif %}
+        </div>
+      </form>
+
+      <!-- Подсказки -->
+      <div class="help-tips">
+        <h4 class="help-title">
+          <i class="fas fa-lightbulb"></i> Советы по созданию задания
+        </h4>
+
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="tip-content">
+            <h6>Четкие инструкции</h6>
+            <p>Подробно опишите, что нужно сделать, какие требования и критерии оценки.</p>
+          </div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="tip-content">
+            <h6>Реалистичные сроки</h6>
+            <p>Установите разумный срок сдачи, учитывая сложность задания.</p>
+          </div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="tip-content">
+            <h6>Система оценивания</h6>
+            <p>Четко определите критерии оценки и максимальный балл.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Элементы формы
+    const titleInput = document.getElementById('id_title');
+    const descriptionInput = document.getElementById('id_description');
+    const titleCounter = document.getElementById('title-counter');
+    const descriptionCounter = document.getElementById('description-counter');
+    const titleLength = document.getElementById('title-length');
+    const descriptionLength = document.getElementById('description-length');
+    const dueDateInput = document.getElementById('id_due_date');
+
+    // Установить минимальную дату (текущая дата + 1 день)
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const minDate = tomorrow.toISOString().slice(0, 16);
+    if (dueDateInput) {
+      dueDateInput.min = minDate;
+
+      // Установить значение по умолчанию (текущая дата + 7 дней)
+      const defaultDate = new Date(today);
+      defaultDate.setDate(defaultDate.getDate() + 7);
+      dueDateInput.value = defaultDate.toISOString().slice(0, 16);
+    }
+
+    // Обновление счетчиков символов
+    function updateCounters() {
+      if (titleInput) {
+        const titleLengthValue = titleInput.value.length;
+        titleLength.textContent = titleLengthValue;
+
+        if (titleLengthValue > 180) {
+          titleCounter.classList.add('near-limit');
+          if (titleLengthValue > 195) {
+            titleCounter.classList.add('over-limit');
+          }
+        } else {
+          titleCounter.classList.remove('near-limit', 'over-limit');
+        }
+      }
+
+      if (descriptionInput) {
+        const descriptionLengthValue = descriptionInput.value.length;
+        descriptionLength.textContent = descriptionLengthValue;
+
+        if (descriptionLengthValue > 4500) {
+          descriptionCounter.classList.add('near-limit');
+          if (descriptionLengthValue > 4900) {
+            descriptionCounter.classList.add('over-limit');
+          }
+        } else {
+          descriptionCounter.classList.remove('near-limit', 'over-limit');
+        }
+      }
+    }
+
+    // Инициализация счетчиков
+    updateCounters();
+
+    // Слушатели событий
+    if (titleInput) titleInput.addEventListener('input', updateCounters);
+    if (descriptionInput) descriptionInput.addEventListener('input', updateCounters);
+
+    // Валидация формы
+    const form = document.getElementById('createAssignmentForm');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        // Проверка названия
+        if (titleInput && !titleInput.value.trim()) {
+          isValid = false;
+          showAlert('Пожалуйста, введите название задания', 'danger');
+          titleInput.focus();
+        }
+
+        // Проверка курса (если не выбран через курс)
+        const courseSelect = document.getElementById('id_course');
+        if (courseSelect && !courseSelect.value) {
+          isValid = false;
+          showAlert('Пожалуйста, выберите курс', 'danger');
+          courseSelect.focus();
+        }
+
+        // Проверка даты
+        if (dueDateInput && dueDateInput.value) {
+          const selectedDate = new Date(dueDateInput.value);
+          if (selectedDate < tomorrow) {
+            isValid = false;
+            showAlert('Срок сдачи должен быть не раньше завтрашнего дня', 'danger');
+            dueDateInput.focus();
+          }
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+          return false;
+        }
+
+        // Показать индикатор загрузки
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание задания...';
+        submitBtn.disabled = true;
+      });
+    }
+
+    // Функция показа алерта
+    function showAlert(message, type) {
+      // Удалить старые алерты
+      const oldAlert = document.querySelector('.custom-alert');
+      if (oldAlert) oldAlert.remove();
+
+      // Создать новый алерт
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} custom-alert alert-dismissible fade show`;
+      alert.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+      // Вставить перед формой
+      if (form) {
+        form.parentNode.insertBefore(alert, form);
+      }
+
+      // Автоматически скрыть через 5 секунд
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.classList.remove('show');
+          setTimeout(() => alert.remove(), 300);
+        }
+      }, 5000);
+    }
+
+    // Автосохранение черновика
+    function autoSave() {
+      const assignmentData = {
+        title: titleInput ? titleInput.value : '',
+        description: descriptionInput ? descriptionInput.value : '',
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem('assignment_draft', JSON.stringify(assignmentData));
+    }
+
+    function loadDraft() {
+      const draft = localStorage.getItem('assignment_draft');
+      if (draft) {
+        try {
+          const data = JSON.parse(draft);
+          // Проверяем, что черновик не старше 24 часов
+          if (new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000) {
+            if (titleInput) titleInput.value = data.title || '';
+            if (descriptionInput) descriptionInput.value = data.description || '';
+            updateCounters();
+
+            // Спросить пользователя, хочет ли он восстановить черновик
+            if ((data.title || data.description) && confirm('Найден черновик задания. Восстановить его?')) {
+              showAlert('Черновик восстановлен', 'info');
+            } else {
+              localStorage.removeItem('assignment_draft');
+            }
+          } else {
+            localStorage.removeItem('assignment_draft');
+          }
+        } catch (e) {
+          localStorage.removeItem('assignment_draft');
+        }
+      }
+    }
+
+    // Загрузить черновик при загрузке страницы
+    loadDraft();
+
+    // Автосохранение
+    if (titleInput) titleInput.addEventListener('input', autoSave);
+    if (descriptionInput) descriptionInput.addEventListener('input', autoSave);
+
+    // Очистить черновик при успешной отправке формы
+    if (form) {
+      form.addEventListener('submit', function() {
+        localStorage.removeItem('assignment_draft');
+      });
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

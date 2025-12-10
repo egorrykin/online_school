@@ -1,0 +1,349 @@
+{% extends 'base.html' %}
+
+{% block title %}Online School - Главная{% endblock %}
+
+{% block extra_css %}
+<style>
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 5rem 0;
+    margin-bottom: 3rem;
+    border-radius: 0 0 2rem 2rem;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+  }
+
+  .feature-card {
+    border: none;
+    border-radius: 1rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+
+  .feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+  }
+
+  .cta-section {
+    background: #f8f9fa;
+    padding: 4rem 0;
+    border-radius: 2rem;
+    margin: 4rem 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Герой-секция -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <h1 class="hero-title">
+          Обучение без границ
+        </h1>
+        <p class="hero-subtitle">
+          Online School - это современная платформа для дистанционного обучения,
+          где учителя создают курсы, а ученики получают качественные знания.
+        </p>
+        {% if not user.is_authenticated %}
+        <div class="d-flex gap-3">
+          <a href="{% url 'register' %}" class="btn btn-light btn-lg">
+            <i class="fas fa-user-plus"></i> Начать обучение
+          </a>
+          <a href="#features" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-info-circle"></i> Узнать больше
+          </a>
+        </div>
+        {% else %}
+        <div class="d-flex gap-3">
+          <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg">
+            <i class="fas fa-tachometer-alt"></i> Перейти к обучению
+          </a>
+          <a href="{% url 'my_courses' %}" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-book"></i> Мои курсы
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="col-lg-6 text-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/2994/2994575.png"
+             alt="Online Learning"
+             class="img-fluid"
+             style="max-height: 400px;">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Статистика -->
+<section class="container mb-5">
+  <div class="row g-4">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-number">1000+</div>
+        <p>Активных учеников</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-number">50+</div>
+        <p>Опытных учителей</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-number">200+</div>
+        <p>Курсов доступно</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-number">98%</div>
+        <p>Довольных пользователей</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Особенности -->
+<section id="features" class="container mb-5">
+  <h2 class="text-center mb-5" style="font-size: 2.5rem; font-weight: 700;">
+    Почему выбирают Online School?
+  </h2>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card feature-card">
+        <div class="card-body text-center p-4">
+          <div class="feature-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7); color: white;">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <h4 class="card-title">Для учителей</h4>
+          <p class="card-text">
+            Создавайте курсы, назначайте задания, оценивайте работы учеников
+            и отслеживайте их прогресс в удобной панели управления.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card feature-card">
+        <div class="card-body text-center p-4">
+          <div class="feature-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white;">
+            <i class="fas fa-user-graduate"></i>
+          </div>
+          <h4 class="card-title">Для учеников</h4>
+          <p class="card-text">
+            Изучайте материалы, выполняйте задания, получайте обратную связь
+            от учителей и отслеживайте свои успехи.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card feature-card">
+        <div class="card-body text-center p-4">
+          <div class="feature-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white;">
+            <i class="fas fa-laptop-house"></i>
+          </div>
+          <h4 class="card-title">Учитесь из дома</h4>
+          <p class="card-text">
+            Полный доступ ко всем материалам в любое время.
+            Обучение в удобном для вас темпе и графике.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Как это работает -->
+<section class="container mb-5">
+  <h2 class="text-center mb-5" style="font-size: 2.5rem; font-weight: 700;">
+    Как это работает?
+  </h2>
+
+  <div class="row align-items-center mb-5">
+    <div class="col-md-6">
+      <div class="p-4">
+        <h3><span class="badge bg-primary me-2">1</span> Регистрация</h3>
+        <p class="lead">Выберите роль: учитель или ученик. Заполните профиль и начните обучение.</p>
+      </div>
+    </div>
+    <div class="col-md-6 text-center">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+           alt="Регистрация"
+           class="img-fluid"
+           style="max-height: 200px;">
+    </div>
+  </div>
+
+  <div class="row align-items-center mb-5">
+    <div class="col-md-6 text-center order-md-2">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135753.png"
+           alt="Курсы"
+           class="img-fluid"
+           style="max-height: 200px;">
+    </div>
+    <div class="col-md-6 order-md-1">
+      <div class="p-4">
+        <h3><span class="badge bg-primary me-2">2</span> Курсы</h3>
+        <p class="lead">Учителя создают курсы, ученики записываются и изучают материалы.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row align-items-center mb-5">
+    <div class="col-md-6">
+      <div class="p-4">
+        <h3><span class="badge bg-primary me-2">3</span> Задания</h3>
+        <p class="lead">Учителя назначают задания, ученики выполняют и отправляют на проверку.</p>
+      </div>
+    </div>
+    <div class="col-md-6 text-center">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png"
+           alt="Задания"
+           class="img-fluid"
+           style="max-height: 200px;">
+    </div>
+  </div>
+</section>
+
+<!-- Призыв к действию -->
+<section class="cta-section">
+  <div class="container text-center">
+    <h2 class="mb-4" style="font-size: 2.5rem; font-weight: 700;">
+      Готовы начать обучение?
+    </h2>
+    <p class="lead mb-4" style="max-width: 600px; margin: 0 auto;">
+      Присоединяйтесь к тысячам учеников и учителей, которые уже используют Online School.
+    </p>
+
+    {% if not user.is_authenticated %}
+    <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+      <i class="fas fa-user-plus"></i> Зарегистрироваться бесплатно
+    </a>
+    <p class="mt-3 text-muted">
+      Это займет меньше минуты
+    </p>
+    {% else %}
+    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+      <i class="fas fa-rocket"></i> Перейти к обучению
+    </a>
+    {% endif %}
+  </div>
+</section>
+
+<!-- Отзывы -->
+<section class="container mb-5">
+  <h2 class="text-center mb-5" style="font-size: 2.5rem; font-weight: 700;">
+    Что говорят наши пользователи
+  </h2>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <img src="https://randomuser.me/api/portraits/women/32.jpg"
+                 alt="Анна"
+                 class="rounded-circle me-3"
+                 style="width: 50px; height: 50px;">
+            <div>
+              <h5 class="mb-0">Анна Петрова</h5>
+              <small class="text-muted">Учитель математики</small>
+            </div>
+          </div>
+          <p class="card-text">
+            "Отличная платформа! Удобно создавать задания и проверять работы.
+            Статистика помогает отслеживать прогресс учеников."
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <img src="https://randomuser.me/api/portraits/men/54.jpg"
+                 alt="Иван"
+                 class="rounded-circle me-3"
+                 style="width: 50px; height: 50px;">
+            <div>
+              <h5 class="mb-0">Иван Смирнов</h5>
+              <small class="text-muted">Ученик 10 класса</small>
+            </div>
+          </div>
+          <p class="card-text">
+            "Благодаря Online School я подтянул физику на отлично!
+            Учитель всегда на связи, задания интересные и понятные."
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <img src="https://randomuser.me/api/portraits/women/67.jpg"
+                 alt="Мария"
+                 class="rounded-circle me-3"
+                 style="width: 50px; height: 50px;">
+            <div>
+              <h5 class="mb-0">Мария Иванова</h5>
+              <small class="text-muted">Ученица 11 класса</small>
+            </div>
+          </div>
+          <p class="card-text">
+            "Очень удобно, что все материалы в одном месте.
+            Можно учиться в любое время и задавать вопросы учителю."
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

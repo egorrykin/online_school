@@ -1,0 +1,367 @@
+/* Основные стили */
+:root {
+    --primary-color: #4a6bdf;
+    --primary-dark: #3a5bcf;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --border-radius: 10px;
+    --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    background-color: #f8f9fa;
+}
+
+/* Карточки */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 2px solid #f0f0f0;
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+/* Кнопки */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+}
+
+/* Навигация */
+.navbar {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Формы */
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(74, 107, 223, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Алерты */
+.alert {
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #155724;
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #721c24;
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border-left: 4px solid var(--warning-color);
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: #0c5460;
+    border-left: 4px solid var(--info-color);
+}
+
+/* Таблицы */
+.table {
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.table thead th {
+    border-top: none;
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(74, 107, 223, 0.05);
+}
+
+/* Бейджи */
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.badge-success {
+    background-color: var(--success-color);
+}
+
+.badge-warning {
+    background-color: var(--warning-color);
+}
+
+.badge-danger {
+    background-color: var(--danger-color);
+}
+
+.badge-info {
+    background-color: var(--info-color);
+}
+
+/* Прогресс-бары */
+.progress {
+    border-radius: 10px;
+    height: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+/* Списки */
+.list-group-item {
+    border: none;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Панель управления */
+.dashboard-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+    height: 100%;
+}
+
+.dashboard-stat {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Задания */
+.assignment-card {
+    border-left: 4px solid;
+    transition: var(--transition);
+}
+
+.assignment-card:hover {
+    transform: translateX(5px);
+}
+
+.assignment-draft {
+    border-left-color: var(--secondary-color);
+}
+
+.assignment-published {
+    border-left-color: var(--success-color);
+}
+
+.assignment-closed {
+    border-left-color: var(--danger-color);
+}
+
+/* Сроки */
+.due-date {
+    font-size: 0.9rem;
+}
+
+.due-date.overdue {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.due-date.upcoming {
+    color: var(--warning-color);
+}
+
+/* Оценки */
+.grade-excellent {
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+.grade-good {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.grade-average {
+    color: var(--warning-color);
+    font-weight: 600;
+}
+
+.grade-poor {
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+/* Аватары */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-lg {
+    width: 100px;
+    height: 100px;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .dashboard-card {
+        padding: 1rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+
+/* Кастомные стили для ролей */
+.teacher-badge {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.student-badge {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+}
+
+/* Курсы */
+.course-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+}
+
+/* Навигация по курсам */
+.course-nav {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.course-nav-item {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.course-nav-item:hover,
+.course-nav-item.active {
+    background-color: rgba(74, 107, 223, 0.1);
+    color: var(--primary-color);
+}
+
+/* Элементы списка */
+.list-item-hover {
+    transition: var(--transition);
+}
+
+.list-item-hover:hover {
+    background-color: rgba(74, 107, 223, 0.05);
+    transform: translateX(5px);
+}

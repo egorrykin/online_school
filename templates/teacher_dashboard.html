@@ -1,0 +1,541 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель учителя - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+  }
+
+  .welcome-message h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .welcome-message p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .quick-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .course-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+  }
+
+  .course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  }
+
+  .course-header {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 1.5rem;
+  }
+
+  .course-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .course-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .assignment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #f8f9fa;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.3s;
+  }
+
+  .assignment-item:hover {
+    background: #e9ecef;
+  }
+
+  .assignment-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .status-draft {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+
+  .status-published {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+  }
+
+  .status-closed {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  .submission-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 10px;
+    background: white;
+    border: 1px solid #e9ecef;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s;
+  }
+
+  .submission-item:hover {
+    border-color: var(--primary-color);
+    transform: translateX(5px);
+  }
+
+  .submission-info h6 {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+  }
+
+  .submission-meta {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Заголовок -->
+  <div class="dashboard-header">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="welcome-message">
+          <h1>👋 Добро пожаловать, {{ user.get_full_name|default:user.username }}!</h1>
+          <p>Панель управления учителя - управляйте курсами, заданиями и оценивайте работы учеников.</p>
+        </div>
+        <div class="quick-actions">
+          <a href="{% url 'create_course' %}" class="btn btn-light">
+            <i class="fas fa-plus-circle"></i> Новый курс
+          </a>
+          <a href="{% url 'create_assignment' %}" class="btn btn-outline-light">
+            <i class="fas fa-tasks"></i> Новое задание
+          </a>
+          <a href="{% url 'teacher_statistics' %}" class="btn btn-outline-light">
+            <i class="fas fa-chart-bar"></i> Статистика
+          </a>
+        </div>
+      </div>
+      <div class="col-md-4 text-center">
+        <i class="fas fa-chalkboard-teacher" style="font-size: 6rem; opacity: 0.8;"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Быстрая статистика -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+        <i class="fas fa-book"></i>
+      </div>
+      <div class="stat-number">{{ stats.courses_count }}</div>
+      <div class="stat-label">Мои курсы</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+        <i class="fas fa-tasks"></i>
+      </div>
+      <div class="stat-number">{{ stats.assignments_count }}</div>
+      <div class="stat-label">Задания</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-number">{{ stats.students_count }}</div>
+      <div class="stat-label">Мои ученики</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-number">{{ stats.submissions_to_grade }}</div>
+      <div class="stat-label">На проверку</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Мои курсы -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-book"></i> Мои курсы
+            <a href="{% url 'create_course' %}" class="btn btn-primary btn-sm float-end">
+              <i class="fas fa-plus"></i> Новый
+            </a>
+          </h3>
+
+          {% if courses %}
+          <div class="row">
+            {% for course in courses|slice:":4" %}
+            <div class="col-md-6 mb-3">
+              <div class="course-card">
+                <div class="course-header">
+                  <h5 class="course-title">{{ course.title|truncatechars:30 }}</h5>
+                  <div class="course-stats">
+                    <span><i class="fas fa-users"></i> {{ course.students.count }}</span>
+                    <span><i class="fas fa-tasks"></i> {{ course.assignments.count }}</span>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <p class="card-text small">{{ course.description|truncatechars:80 }}</p>
+                  <div class="d-flex justify-content-between">
+                    {% if course.id %}
+                    <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-primary btn-sm">
+                      <i class="fas fa-eye"></i> Подробнее
+                    </a>
+                    {% else %}
+                    <button class="btn btn-outline-secondary btn-sm" disabled>
+                      <i class="fas fa-eye"></i> Подробнее
+                    </button>
+                    {% endif %}
+                    <span class="text-muted small">{{ course.created_at|date:"d.m.Y" }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if courses.count > 4 %}
+          <div class="text-center mt-3">
+            <a href="{% url 'my_courses' %}" class="btn btn-outline-primary">
+              <i class="fas fa-list"></i> Показать все курсы ({{ courses.count }})
+            </a>
+          </div>
+          {% endif %}
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-book-open"></i>
+            <h5>У вас пока нет курсов</h5>
+            <p>Создайте свой первый курс и начните обучение</p>
+            <a href="{% url 'create_course' %}" class="btn btn-primary">
+              <i class="fas fa-plus-circle"></i> Создать курс
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Последние задания -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-tasks"></i> Последние задания
+            <a href="{% url 'create_assignment' %}" class="btn btn-primary btn-sm float-end">
+              <i class="fas fa-plus"></i> Новое
+            </a>
+          </h3>
+
+          {% if assignments %}
+          <div class="assignment-list">
+            {% for assignment in assignments|slice:":5" %}
+            <div class="assignment-item">
+              <div>
+                <h6 class="mb-1">{{ assignment.title|truncatechars:40 }}</h6>
+                <small class="text-muted">{{ assignment.course.title }}</small>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                                <span class="assignment-status status-{{ assignment.status }}">
+                                    {{ assignment.get_status_display }}
+                                </span>
+                <a href="{% url 'assignment_detail' assignment.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if assignments.count > 5 %}
+          <div class="text-center mt-3">
+            <a href="#" class="btn btn-outline-primary">
+              <i class="fas fa-list"></i> Все задания
+            </a>
+          </div>
+          {% endif %}
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-tasks"></i>
+            <h5>Нет заданий</h5>
+            <p>Создайте первое задание для ваших курсов</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Работы на проверку -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-check-circle"></i> Работы на проверку
+          </h3>
+
+          {% if submissions_to_grade %}
+          <div class="submission-list">
+            {% for submission in submissions_to_grade|slice:":5" %}
+            <div class="submission-item">
+              <div class="submission-info">
+                <h6 class="mb-1">{{ submission.student.get_full_name|default:submission.student.username }}</h6>
+                <p class="submission-meta mb-0">
+                  {{ submission.assignment.title }}
+                  <br>
+                  <small>Отправлено: {{ submission.submitted_at|date:"d.m.Y H:i" }}</small>
+                </p>
+              </div>
+              <div>
+                <a href="{% url 'grade_submission' submission.id %}" class="btn btn-success btn-sm">
+                  <i class="fas fa-check"></i> Проверить
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if submissions_to_grade.count > 5 %}
+          <div class="text-center mt-3">
+            <a href="#" class="btn btn-outline-primary">
+              <i class="fas fa-list"></i> Все работы ({{ submissions_to_grade.count }})
+            </a>
+          </div>
+          {% endif %}
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h5>Нет работ на проверку</h5>
+            <p>Все работы проверены. Отличная работа!</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Последние объявления -->
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="section-title">
+            <i class="fas fa-bullhorn"></i> Последние объявления
+            <button class="btn btn-primary btn-sm float-end" data-bs-toggle="modal" data-bs-target="#announcementModal">
+              <i class="fas fa-plus"></i> Новое
+            </button>
+          </h3>
+
+          {% if recent_announcements %}
+          <div class="announcement-list">
+            {% for announcement in recent_announcements %}
+            <div class="card mb-2">
+              <div class="card-body">
+                <h6 class="mb-1">{{ announcement.title }}</h6>
+                <p class="text-muted small mb-2">{{ announcement.content|truncatechars:100 }}</p>
+                <div class="d-flex justify-content-between">
+                  <small><i class="fas fa-book"></i> {{ announcement.course.title }}</small>
+                  <small><i class="far fa-clock"></i> {{ announcement.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% else %}
+          <div class="empty-state">
+            <i class="fas fa-bullhorn"></i>
+            <h5>Нет объявлений</h5>
+            <p>Создайте первое объявление для ваших учеников</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="announcementModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Новое объявление</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      {% if courses and courses.first %}
+      <form method="post" action="{% url 'course_detail' courses.first.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Выберите курс</label>
+            <select name="course_id" class="form-select" required>
+              <option value="">Выберите курс</option>
+              {% for course in courses %}
+              {% if course.id %}
+              <option value="{{ course.id }}">{{ course.title }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Заголовок</label>
+            <input type="text" name="title" class="form-control" required placeholder="Заголовок объявления">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Содержание</label>
+            <textarea name="content" class="form-control" rows="4" required placeholder="Содержание объявления"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary">Опубликовать</button>
+        </div>
+      </form>
+      {% else %}
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle"></i>
+          У вас пока нет курсов. Создайте курс сначала.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <a href="{% url 'create_course' %}" class="btn btn-primary">Создать курс</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Изменяем форму объявления в зависимости от выбранного курса
+    const announcementForm = document.getElementById('announcementForm');
+    if (announcementForm) {
+      const courseSelect = announcementForm.querySelector('select[name="course"]');
+
+      if (courseSelect) {
+        courseSelect.addEventListener('change', function() {
+          if (this.value && this.value !== '') {
+            announcementForm.action = `/courses/${this.value}/`;
+          }
+        });
+
+        // Устанавливаем первое значение по умолчанию, только если есть курсы
+        if (courseSelect.options.length > 1) {
+          const firstOption = courseSelect.options[1];
+          if (firstOption && firstOption.value) {
+            courseSelect.value = firstOption.value;
+            announcementForm.action = `/courses/${firstOption.value}/`;
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

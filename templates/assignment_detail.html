@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ assignment.title }} - Online School{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Панель управления</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">Мои курсы</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'course_detail' assignment.course.id %}">{{ assignment.course.title }}</a></li>
+      <li class="breadcrumb-item active">{{ assignment.title }}</li>
+    </ol>
+  </nav>
+
+  <h1>{{ assignment.title }}</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <p>{{ assignment.description|linebreaks }}</p>
+
+      <div class="mt-4">
+        <p><strong>Срок сдачи:</strong> {{ assignment.due_date|date:"d.m.Y H:i" }}</p>
+        <p><strong>Максимальный балл:</strong> {{ assignment.max_points }}</p>
+        <p><strong>Статус:</strong> {{ assignment.get_status_display }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

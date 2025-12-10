@@ -1,0 +1,576 @@
+{% extends 'base.html' %}
+
+{% block title %}Создать курс - Online School{% endblock %}
+
+{% block extra_css %}
+<style>
+  .create-course-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .create-course-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  .create-course-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .create-course-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .create-course-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .create-course-body {
+    padding: 3rem;
+    background: white;
+  }
+
+  .form-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f0f0f0;
+    color: var(--primary-color);
+  }
+
+  .form-control, .form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(74, 107, 223, 0.25);
+  }
+
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  .character-counter {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-align: right;
+    margin-top: 0.25rem;
+  }
+
+  .character-counter.near-limit {
+    color: #ffc107;
+  }
+
+  .character-counter.over-limit {
+    color: #dc3545;
+  }
+
+  .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+  }
+
+  .btn-create-course {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .back-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .help-tips {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .help-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+  }
+
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .tip-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tip-content h6 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .tip-content p {
+    color: #6c757d;
+    margin-bottom: 0;
+  }
+
+  .preview-section {
+    background: white;
+    border: 2px dashed #dee2e6;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 2rem;
+  }
+
+  .preview-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+  }
+
+  .course-preview {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .preview-course-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .preview-course-description {
+    color: #6c757d;
+    line-height: 1.6;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-course-container fade-in">
+  <div class="create-course-card">
+    <div class="create-course-header">
+      <h1 class="create-course-title">
+        <i class="fas fa-plus-circle"></i> Создать новый курс
+      </h1>
+      <p class="create-course-subtitle">
+        Создайте курс, чтобы начать обучение учеников
+      </p>
+    </div>
+
+    <div class="create-course-body">
+      <form method="post" id="createCourseForm">
+        {% csrf_token %}
+
+        <!-- Основная информация -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-info-circle"></i> Основная информация
+          </h2>
+
+          <div class="mb-4">
+            <label for="id_title" class="form-label">
+              <i class="fas fa-heading"></i> Название курса
+            </label>
+            <input type="text" name="title" id="id_title"
+                   class="form-control" required maxlength="200"
+                   placeholder="Введите название курса (например: 'Математика 10 класс')"
+                   value="{{ form.title.value|default:'' }}">
+            <div class="form-text">
+              Придумайте короткое и понятное название курса. Максимум 200 символов.
+            </div>
+            <div class="character-counter" id="title-counter">
+              <span id="title-length">0</span>/200 символов
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="id_description" class="form-label">
+              <i class="fas fa-align-left"></i> Описание курса
+            </label>
+            <textarea name="description" id="id_description"
+                      class="form-control" rows="6" required
+                      placeholder="Опишите содержание курса, цели обучения, требования к ученикам...">{{ form.description.value|default:'' }}</textarea>
+            <div class="form-text">
+              Подробно опишите, что будут изучать ученики на этом курсе.
+            </div>
+            <div class="character-counter" id="description-counter">
+              <span id="description-length">0</span>/5000 символов
+            </div>
+          </div>
+        </div>
+
+        <!-- Настройки курса -->
+        <div class="form-section">
+          <h2 class="section-title">
+            <i class="fas fa-cog"></i> Настройки курса
+          </h2>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                <i class="fas fa-lock"></i> Доступ к курсу
+              </label>
+              <select class="form-select" disabled>
+                <option selected>Открытый (по приглашению)</option>
+              </select>
+              <div class="form-text">
+                Пока доступен только режим по приглашению. Ученики записываются через панель управления.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">
+                <i class="fas fa-calendar-alt"></i> Дата начала
+              </label>
+              <input type="date" class="form-control"
+                     value="{% now 'Y-m-d' %}" disabled>
+              <div class="form-text">
+                Курс начнется сразу после создания.
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="enable_announcements" checked disabled>
+              <label class="form-check-label" for="enable_announcements">
+                Разрешить объявления в курсе
+              </label>
+            </div>
+            <div class="form-text">
+              Вы сможете публиковать важные объявления для учеников.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="enable_discussions" checked disabled>
+              <label class="form-check-label" for="enable_discussions">
+                Разрешить обсуждения заданий
+              </label>
+            </div>
+            <div class="form-text">
+              Ученики смогут задавать вопросы по заданиям.
+            </div>
+          </div>
+        </div>
+
+        <!-- Предпросмотр -->
+        <div class="preview-section">
+          <h3 class="preview-title">
+            <i class="fas fa-eye"></i> Предпросмотр курса
+          </h3>
+          <div class="course-preview">
+            <h4 class="preview-course-title" id="preview-title">
+              Название курса появится здесь
+            </h4>
+            <p class="preview-course-description" id="preview-description">
+              Описание курса появится здесь
+            </p>
+            <div class="text-muted small">
+              <i class="fas fa-chalkboard-teacher"></i> Преподаватель: {{ user.get_full_name|default:user.username }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-create-course">
+            <i class="fas fa-plus-circle"></i> Создать курс
+          </button>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary" style="padding: 1rem 2rem;">
+            <i class="fas fa-times"></i> Отмена
+          </a>
+        </div>
+      </form>
+
+      <div class="back-link">
+        <p>
+          <a href="{% url 'my_courses' %}" style="color: var(--primary-color); font-weight: 600;">
+            <i class="fas fa-arrow-left"></i> Вернуться к моим курсам
+          </a>
+        </p>
+      </div>
+
+      <!-- Подсказки -->
+      <div class="help-tips">
+        <h4 class="help-title">
+          <i class="fas fa-lightbulb"></i> Советы по созданию курса
+        </h4>
+
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="tip-content">
+            <h6>Четкое название</h6>
+            <p>Используйте понятное название, отражающее содержание курса.</p>
+          </div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-list"></i>
+          </div>
+          <div class="tip-content">
+            <h6>Подробное описание</h6>
+            <p>Опишите цели курса, темы занятий и что узнают ученики.</p>
+          </div>
+        </div>
+
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-tasks"></i>
+          </div>
+          <div class="tip-content">
+            <h6>Планируйте задания</h6>
+            <p>Продумайте структуру заданий перед созданием курса.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('id_title');
+    const descriptionInput = document.getElementById('id_description');
+    const titleCounter = document.getElementById('title-counter');
+    const descriptionCounter = document.getElementById('description-counter');
+    const titleLength = document.getElementById('title-length');
+    const descriptionLength = document.getElementById('description-length');
+    const previewTitle = document.getElementById('preview-title');
+    const previewDescription = document.getElementById('preview-description');
+
+    // Обновление счетчиков символов
+    function updateCounters() {
+      const titleLengthValue = titleInput.value.length;
+      const descriptionLengthValue = descriptionInput.value.length;
+
+      titleLength.textContent = titleLengthValue;
+      descriptionLength.textContent = descriptionLengthValue;
+
+      // Подсветка при приближении к лимиту
+      if (titleLengthValue > 180) {
+        titleCounter.classList.add('near-limit');
+        if (titleLengthValue > 195) {
+          titleCounter.classList.add('over-limit');
+        }
+      } else {
+        titleCounter.classList.remove('near-limit', 'over-limit');
+      }
+
+      if (descriptionLengthValue > 4500) {
+        descriptionCounter.classList.add('near-limit');
+        if (descriptionLengthValue > 4900) {
+          descriptionCounter.classList.add('over-limit');
+        }
+      } else {
+        descriptionCounter.classList.remove('near-limit', 'over-limit');
+      }
+
+      // Обновление предпросмотра
+      updatePreview();
+    }
+
+    // Обновление предпросмотра
+    function updatePreview() {
+      const title = titleInput.value.trim() || 'Название курса появится здесь';
+      const description = descriptionInput.value.trim() || 'Описание курса появится здесь';
+
+      previewTitle.textContent = title;
+      previewDescription.textContent = description;
+    }
+
+    // Инициализация счетчиков
+    updateCounters();
+
+    // Слушатели событий
+    titleInput.addEventListener('input', updateCounters);
+    descriptionInput.addEventListener('input', updateCounters);
+
+    // Валидация формы
+    const form = document.getElementById('createCourseForm');
+    form.addEventListener('submit', function(e) {
+      const title = titleInput.value.trim();
+      const description = descriptionInput.value.trim();
+
+      if (!title) {
+        e.preventDefault();
+        showAlert('Пожалуйста, введите название курса', 'danger');
+        titleInput.focus();
+        return false;
+      }
+
+      if (!description) {
+        e.preventDefault();
+        showAlert('Пожалуйста, введите описание курса', 'danger');
+        descriptionInput.focus();
+        return false;
+      }
+
+      if (title.length > 200) {
+        e.preventDefault();
+        showAlert('Название курса слишком длинное (максимум 200 символов)', 'danger');
+        titleInput.focus();
+        return false;
+      }
+
+      if (description.length > 5000) {
+        e.preventDefault();
+        showAlert('Описание курса слишком длинное (максимум 5000 символов)', 'danger');
+        descriptionInput.focus();
+        return false;
+      }
+
+      // Показать индикатор загрузки
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание курса...';
+      submitBtn.disabled = true;
+    });
+
+    // Функция показа алерта
+    function showAlert(message, type) {
+      // Удалить старые алерты
+      const oldAlert = document.querySelector('.custom-alert');
+      if (oldAlert) oldAlert.remove();
+
+      // Создать новый алерт
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} custom-alert alert-dismissible fade show`;
+      alert.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+      // Вставить перед формой
+      form.parentNode.insertBefore(alert, form);
+
+      // Автоматически скрыть через 5 секунд
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.classList.remove('show');
+          setTimeout(() => alert.remove(), 300);
+        }
+      }, 5000);
+    }
+
+    // Автосохранение в localStorage (опционально)
+    function autoSave() {
+      const courseData = {
+        title: titleInput.value,
+        description: descriptionInput.value,
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem('course_draft', JSON.stringify(courseData));
+    }
+
+    function loadDraft() {
+      const draft = localStorage.getItem('course_draft');
+      if (draft) {
+        try {
+          const data = JSON.parse(draft);
+          // Проверяем, что черновик не старше 24 часов
+          if (new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000) {
+            titleInput.value = data.title || '';
+            descriptionInput.value = data.description || '';
+            updateCounters();
+
+            // Спросить пользователя, хочет ли он восстановить черновик
+            if (data.title || data.description) {
+              if (confirm('Найден черновик курса. Восстановить его?')) {
+                showAlert('Черновик восстановлен', 'info');
+              } else {
+                localStorage.removeItem('course_draft');
+              }
+            }
+          } else {
+            localStorage.removeItem('course_draft');
+          }
+        } catch (e) {
+          localStorage.removeItem('course_draft');
+        }
+      }
+    }
+
+    // Загрузить черновик при загрузке страницы
+    loadDraft();
+
+    // Автосохранение каждые 10 секунд
+    titleInput.addEventListener('input', autoSave);
+    descriptionInput.addEventListener('input', autoSave);
+
+    // Очистить черновик при успешной отправке формы
+    form.addEventListener('submit', function() {
+      localStorage.removeItem('course_draft');
+    });
+
+    // Предотвратить потерю данных при уходе со страницы
+    window.addEventListener('beforeunload', function(e) {
+      if (titleInput.value || descriptionInput.value) {
+        e.preventDefault();
+        e.returnValue = 'У вас есть несохраненные изменения. Вы уверены, что хотите покинуть страницу?';
+        return e.returnValue;
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

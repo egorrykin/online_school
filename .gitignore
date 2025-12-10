@@ -5,7 +5,57 @@ __pycache__/
 
 # C extensions
 *.so
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
 
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Static files (после collectstatic)
+staticfiles/
+
+# Backup files
+*.bak
+
+# Coverage
+.coverage
+htmlcov/
+
+# pytest
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
 # Distribution / packaging
 .Python
 build/
