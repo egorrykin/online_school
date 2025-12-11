@@ -215,7 +215,6 @@
       <form method="post" id="createCourseForm">
         {% csrf_token %}
 
-        <!-- Основная информация -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fas fa-info-circle"></i> Основная информация
@@ -253,7 +252,6 @@
           </div>
         </div>
 
-        <!-- Настройки курса -->
         <div class="form-section">
           <h2 class="section-title">
             <i class="fas fa-cog"></i> Настройки курса
@@ -309,7 +307,6 @@
           </div>
         </div>
 
-        <!-- Предпросмотр -->
         <div class="preview-section">
           <h3 class="preview-title">
             <i class="fas fa-eye"></i> Предпросмотр курса
@@ -327,7 +324,6 @@
           </div>
         </div>
 
-        <!-- Кнопки действий -->
         <div class="form-actions">
           <button type="submit" class="btn btn-primary btn-create-course">
             <i class="fas fa-plus-circle"></i> Создать курс
@@ -346,7 +342,6 @@
         </p>
       </div>
 
-      <!-- Подсказки -->
       <div class="help-tips">
         <h4 class="help-title">
           <i class="fas fa-lightbulb"></i> Советы по созданию курса
@@ -398,7 +393,6 @@
     const previewTitle = document.getElementById('preview-title');
     const previewDescription = document.getElementById('preview-description');
 
-    // Обновление счетчиков символов
     function updateCounters() {
       const titleLengthValue = titleInput.value.length;
       const descriptionLengthValue = descriptionInput.value.length;
@@ -406,7 +400,6 @@
       titleLength.textContent = titleLengthValue;
       descriptionLength.textContent = descriptionLengthValue;
 
-      // Подсветка при приближении к лимиту
       if (titleLengthValue > 180) {
         titleCounter.classList.add('near-limit');
         if (titleLengthValue > 195) {
@@ -425,11 +418,9 @@
         descriptionCounter.classList.remove('near-limit', 'over-limit');
       }
 
-      // Обновление предпросмотра
       updatePreview();
     }
 
-    // Обновление предпросмотра
     function updatePreview() {
       const title = titleInput.value.trim() || 'Название курса появится здесь';
       const description = descriptionInput.value.trim() || 'Описание курса появится здесь';
@@ -438,14 +429,11 @@
       previewDescription.textContent = description;
     }
 
-    // Инициализация счетчиков
     updateCounters();
 
-    // Слушатели событий
     titleInput.addEventListener('input', updateCounters);
     descriptionInput.addEventListener('input', updateCounters);
 
-    // Валидация формы
     const form = document.getElementById('createCourseForm');
     form.addEventListener('submit', function(e) {
       const title = titleInput.value.trim();
@@ -479,20 +467,16 @@
         return false;
       }
 
-      // Показать индикатор загрузки
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание курса...';
       submitBtn.disabled = true;
     });
 
-    // Функция показа алерта
     function showAlert(message, type) {
-      // Удалить старые алерты
       const oldAlert = document.querySelector('.custom-alert');
       if (oldAlert) oldAlert.remove();
 
-      // Создать новый алерт
       const alert = document.createElement('div');
       alert.className = `alert alert-${type} custom-alert alert-dismissible fade show`;
       alert.innerHTML = `
@@ -500,10 +484,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
 
-      // Вставить перед формой
       form.parentNode.insertBefore(alert, form);
 
-      // Автоматически скрыть через 5 секунд
       setTimeout(() => {
         if (alert.parentNode) {
           alert.classList.remove('show');
@@ -512,7 +494,6 @@
       }, 5000);
     }
 
-    // Автосохранение в localStorage (опционально)
     function autoSave() {
       const courseData = {
         title: titleInput.value,
@@ -527,13 +508,11 @@
       if (draft) {
         try {
           const data = JSON.parse(draft);
-          // Проверяем, что черновик не старше 24 часов
           if (new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000) {
             titleInput.value = data.title || '';
             descriptionInput.value = data.description || '';
             updateCounters();
 
-            // Спросить пользователя, хочет ли он восстановить черновик
             if (data.title || data.description) {
               if (confirm('Найден черновик курса. Восстановить его?')) {
                 showAlert('Черновик восстановлен', 'info');
@@ -550,19 +529,15 @@
       }
     }
 
-    // Загрузить черновик при загрузке страницы
     loadDraft();
 
-    // Автосохранение каждые 10 секунд
     titleInput.addEventListener('input', autoSave);
     descriptionInput.addEventListener('input', autoSave);
 
-    // Очистить черновик при успешной отправке формы
     form.addEventListener('submit', function() {
       localStorage.removeItem('course_draft');
     });
 
-    // Предотвратить потерю данных при уходе со страницы
     window.addEventListener('beforeunload', function(e) {
       if (titleInput.value || descriptionInput.value) {
         e.preventDefault();

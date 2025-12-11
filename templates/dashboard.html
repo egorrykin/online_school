@@ -215,7 +215,6 @@
 
 {% block content %}
 <div class="dashboard-container">
-  <!-- Заголовок -->
   <div class="dashboard-header">
     <div class="welcome-message">
       <h1>👋 Добро пожаловать, {{ user.username }}!</h1>
@@ -226,7 +225,6 @@
     </a>
   </div>
 
-  <!-- Быстрая статистика -->
   <div class="quick-stats">
     <div class="stat-card">
       <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
@@ -269,9 +267,7 @@
     </div>
   </div>
 
-  <!-- Основные разделы -->
   <div class="dashboard-sections">
-    <!-- Задачи к выполнению -->
     <div class="section-card">
       <div class="section-header">
         <h3 class="section-title">
@@ -330,7 +326,6 @@
       {% endif %}
     </div>
 
-    <!-- Задачи в процессе -->
     <div class="section-card">
       <div class="section-header">
         <h3 class="section-title">
@@ -389,7 +384,6 @@
       {% endif %}
     </div>
 
-    <!-- Последние выполненные -->
     <div class="section-card">
       <div class="section-header">
         <h3 class="section-title">
@@ -439,7 +433,6 @@
       {% endif %}
     </div>
 
-    <!-- Продуктивность -->
     <div class="section-card">
       <div class="section-header">
         <h3 class="section-title">
@@ -491,7 +484,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Анимация прогресс-бара
     const progressBar = document.querySelector('.progress-bar');
     const width = progressBar.style.width;
     progressBar.style.width = '0';
@@ -501,7 +493,6 @@
       progressBar.style.width = width;
     }, 300);
 
-    // Подтверждение удаления
     const deleteButtons = document.querySelectorAll('.action-btn.delete');
     deleteButtons.forEach(btn => {
       btn.addEventListener('click', function(e) {

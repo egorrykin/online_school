@@ -111,7 +111,6 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 class ProfileForm(forms.ModelForm):
-    # Добавляем поля из модели User
     first_name = forms.CharField(
         max_length=30,
         required=False,
@@ -159,7 +158,6 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Устанавливаем начальные значения из связанного пользователя
         if self.instance and self.instance.user:
             self.fields['first_name'].initial = self.instance.user.first_name
             self.fields['last_name'].initial = self.instance.user.last_name
@@ -168,7 +166,6 @@ class ProfileForm(forms.ModelForm):
     def save(self, commit=True):
         profile = super().save(commit=False)
 
-        # Сохраняем данные пользователя
         profile.user.first_name = self.cleaned_data['first_name']
         profile.user.last_name = self.cleaned_data['last_name']
         profile.user.email = self.cleaned_data['email']

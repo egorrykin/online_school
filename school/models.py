@@ -27,7 +27,6 @@ class Profile(models.Model):
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"
 
-    # Методы для статистики учеников
     def get_average_grade(self):
         """Средняя оценка ученика"""
         if self.role != 'student':
@@ -57,13 +56,11 @@ class Profile(models.Model):
             return round((completed_assignments / total_assignments) * 100)
         return 0
 
-    # Методы для статистики учителей
     def get_total_students(self):
         """Общее количество учеников у учителя"""
         if self.role != 'teacher':
             return 0
 
-        from .models import Course
         return User.objects.filter(
             profile__role='student',
             courses_enrolled__teacher=self.user
@@ -88,7 +85,6 @@ class Profile(models.Model):
         else:
             return self.user.courses_enrolled.count()
 
-    # В классе Profile удалите метод get_recent_activity или замените его на:
     def get_recent_activity_list(self):
         """Последняя активность (простой список)"""
         activities = []
@@ -130,7 +126,6 @@ class Profile(models.Model):
                     'course': assignment.course.title
                 })
 
-        # Сортируем по дате
         activities.sort(key=lambda x: x['date'], reverse=True)
         return activities[:5]
 

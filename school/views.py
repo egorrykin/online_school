@@ -12,45 +12,36 @@ from .forms import (UserRegistrationForm, LoginForm, CourseForm,
 from django.http import JsonResponse
 
 def home(request):
-    """Главная страница"""
     if request.user.is_authenticated:
         return redirect('dashboard')
 
     return render(request, 'home.html')
 
 def register_view(request):
-    """Регистрация с выбором роли"""
     if request.user.is_authenticated:
         return redirect('dashboard')
 
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            # Сохраняем пользователя
             user = form.save()
 
-            # Получаем выбранную роль
             role = form.cleaned_data.get('role')
 
-            # Проверяем, есть ли уже профиль (на случай если сигналы работают)
             profile_exists = Profile.objects.filter(user=user).exists()
 
             if not profile_exists:
-                # Создаем профиль с выбранной ролью
                 Profile.objects.create(user=user, role=role)
             else:
-                # Если профиль уже существует (через сигналы), обновляем роль
                 profile = Profile.objects.get(user=user)
                 profile.role = role
                 profile.save()
 
-            # Автоматический вход
             login(request, user)
 
             messages.success(request, f'🎉 Добро пожаловать в Online School, {user.first_name}!')
             return redirect('dashboard')
         else:
-            # Показываем ошибки формы
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'{field}: {error}')
@@ -60,7 +51,6 @@ def register_view(request):
     return render(request, 'register.html', {'form': form})
 
 def login_view(request):
-    """Вход в систему"""
     if request.user.is_authenticated:
         return redirect('dashboard')
 
@@ -84,18 +74,15 @@ def login_view(request):
 
 @login_required
 def logout_view(request):
-    """Выход из системы"""
     messages.info(request, '👋 Вы вышли из системы. До новых встреч!')
     logout(request)
     return redirect('home')
 
 @login_required
 def dashboard(request):
-    """Главная панель управления (определяет роль)"""
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:
-        # Если профиль не создан, создаем его как ученика по умолчанию
         profile = Profile.objects.create(user=request.user, role='student')
 
     if profile.role == 'teacher':
@@ -104,14 +91,12 @@ def dashboard(request):
         return student_dashboard(request)
 
 def teacher_check(user):
-    """Проверка, что пользователь - учитель"""
     try:
         return user.profile.role == 'teacher'
     except Profile.DoesNotExist:
         return False
 
 def student_check(user):
-    """Проверка, что пользователь - ученик"""
     try:
         return user.profile.role == 'student'
     except Profile.DoesNotExist:
@@ -120,20 +105,15 @@ def student_check(user):
 @login_required
 @user_passes_test(teacher_check, login_url='/dashboard/')
 def teacher_dashboard(request):
-    """Панель управления учителя"""
-    # Курсы, которые ведет учитель
     courses = Course.objects.filter(teacher=request.user)
 
-    # Все задания учителя
     assignments = Assignment.objects.filter(teacher=request.user)
 
-    # Последние решения для проверки
     submissions_to_grade = Submission.objects.filter(
         assignment__teacher=request.user,
         grade__isnull=True
     ).order_by('-submitted_at')[:10]
 
-    # Статистика
     stats = {
         'courses_count': courses.count(),
         'assignments_count': assignments.count(),
@@ -144,7 +124,6 @@ def teacher_dashboard(request):
         'submissions_to_grade': submissions_to_grade.count(),
     }
 
-    # Последние объявления
     recent_announcements = Announcement.objects.filter(
         course__teacher=request.user
     ).order_by('-created_at')[:5]
@@ -162,18 +141,14 @@ def teacher_dashboard(request):
 @login_required
 @user_passes_test(student_check, login_url='/dashboard/')
 def student_dashboard(request):
-    """Панель управления ученика"""
-    # Курсы, на которые записан ученик
     courses = request.user.courses_enrolled.all()
 
-    # Активные задания
     active_assignments = Assignment.objects.filter(
         course__in=courses,
         status='published',
         due_date__gt=timezone.now()
     ).order_by('due_date')
 
-    # Просроченные задания
     overdue_assignments = Assignment.objects.filter(
         course__in=courses,
         status='published',
@@ -182,12 +157,10 @@ def student_dashboard(request):
         submissions__student=request.user
     ).order_by('due_date')
 
-    # Последние сданные работы
     recent_submissions = Submission.objects.filter(
         student=request.user
     ).order_by('-submitted_at')[:5]
 
-    # Средняя успеваемость
     grades = Submission.objects.filter(
         student=request.user,
         grade__isnull=False
@@ -195,7 +168,6 @@ def student_dashboard(request):
         avg_grade=Avg('grade')
     )
 
-    # Подсчет выполненных заданий для каждого ученика
     student_submissions_count = {}
     for course in courses:
         for student in course.students.all():
@@ -225,10 +197,8 @@ def create_course(request):
             course.teacher = request.user
             course.save()
             messages.success(request, '✅ Курс успешно создан!')
-            # Редирект на панель управления (dashboard сам определит роль)
             return redirect('dashboard')
         else:
-            # Показываем ошибки формы
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'{field}: {error}')
@@ -243,7 +213,6 @@ def course_detail(request, course_id):
     """Детальная информация о курсе"""
     course = get_object_or_404(Course, id=course_id, teacher=request.user)
 
-    # Добавление учеников в курс
     if request.method == 'POST' and 'add_student' in request.POST:
         student_id = request.POST.get('student_id')
         student = get_object_or_404(User, id=student_id, profile__role='student')
@@ -251,7 +220,6 @@ def course_detail(request, course_id):
         messages.success(request, f'✅ Ученик {student.get_full_name()} добавлен в курс!')
         return redirect('course_detail', course_id=course_id)
 
-    # Удаление ученика из курса
     if request.method == 'POST' and 'remove_student' in request.POST:
         student_id = request.POST.get('student_id')
         student = get_object_or_404(User, id=student_id)
@@ -259,7 +227,6 @@ def course_detail(request, course_id):
         messages.success(request, f'✅ Ученик {student.get_full_name()} удален из курса!')
         return redirect('course_detail', course_id=course_id)
 
-    # Создание объявления
     if request.method == 'POST' and 'create_announcement' in request.POST:
         announcement_form = AnnouncementForm(request.POST)
         if announcement_form.is_valid():
@@ -272,7 +239,6 @@ def course_detail(request, course_id):
     else:
         announcement_form = AnnouncementForm()
 
-    # Все ученики для добавления (кроме уже добавленных)
     available_students = User.objects.filter(
         profile__role='student'
     ).exclude(
@@ -307,15 +273,12 @@ def create_assignment(request, course_id=None):
             messages.success(request, '✅ Задание успешно создано!')
 
             if course:
-                # Редирект на страницу курса
                 return redirect('course_detail', course_id=course.id)
             else:
-                # Редирект на страницу задания
                 return redirect('assignment_detail', assignment_id=assignment.id)
     else:
         form = AssignmentForm(user=request.user)
         if course:
-            # Устанавливаем курс по умолчанию
             form.fields['course'].initial = course
 
     context = {
@@ -330,7 +293,6 @@ def assignment_detail(request, assignment_id):
     """Детальная информация о задании"""
     assignment = get_object_or_404(Assignment, id=assignment_id)
 
-    # Проверка прав доступа
     is_teacher = request.user == assignment.teacher
     is_student = request.user.profile.role == 'student' and request.user in assignment.course.students.all()
 
@@ -338,7 +300,6 @@ def assignment_detail(request, assignment_id):
         messages.error(request, '❌ У вас нет доступа к этому заданию.')
         return redirect('dashboard')
 
-    # Для ученика: форма сдачи задания
     submission = None
     submission_form = None
 
@@ -361,7 +322,6 @@ def assignment_detail(request, assignment_id):
             else:
                 submission_form = SubmissionForm()
 
-    # Для учителя: список всех решений
     submissions = None
     if is_teacher:
         submissions = assignment.submissions.all()
@@ -394,7 +354,6 @@ def submissions_list(request, assignment_id):
 @login_required
 @user_passes_test(teacher_check, login_url='/dashboard/')
 def grade_submission(request, submission_id):
-    """Оценивание решения"""
     submission = get_object_or_404(Submission, id=submission_id, assignment__teacher=request.user)
 
     if request.method == 'POST':
@@ -426,13 +385,11 @@ def my_courses(request):
     else:
         courses = request.user.courses_enrolled.all()
 
-    # Доступные курсы для записи (только для учеников)
     available_courses = None
     if profile.role == 'student':
-        # Исключаем курсы, на которые уже записан ученик
         available_courses = Course.objects.exclude(
             students=request.user
-        ).all()[:10]  # Убрали фильтр по status
+        ).all()[:10]
 
     context = {
         'courses': courses,
@@ -444,7 +401,6 @@ def my_courses(request):
 
 @login_required
 def enroll_course(request, course_id):
-    """Запись на курс (для учеников)"""
     if not student_check(request.user):
         messages.error(request, '❌ Только ученики могут записываться на курсы.')
         return redirect('dashboard')
@@ -460,7 +416,6 @@ def enroll_course(request, course_id):
 
 @login_required
 def profile_view(request):
-    """Просмотр и редактирование профиля"""
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:
@@ -485,8 +440,6 @@ def profile_view(request):
 @login_required
 @user_passes_test(teacher_check, login_url='/dashboard/')
 def teacher_statistics(request):
-    """Статистика для учителя"""
-    # Общая статистика
     courses_count = Course.objects.filter(teacher=request.user).count()
     assignments_count = Assignment.objects.filter(teacher=request.user).count()
     students_count = User.objects.filter(
@@ -494,14 +447,12 @@ def teacher_statistics(request):
         courses_enrolled__teacher=request.user
     ).distinct().count()
 
-    # Статистика по курсам
     courses_stats = Course.objects.filter(teacher=request.user).annotate(
         assignments_count=Count('assignments'),
         students_count=Count('students'),
         avg_grade=Avg('assignments__submissions__grade')
     )
 
-    # График успеваемости по месяцам (примерные данные)
     monthly_stats = [
         {'month': 'Янв', 'avg_grade': 85},
         {'month': 'Фев', 'avg_grade': 88},
@@ -523,33 +474,26 @@ def teacher_statistics(request):
 
 @login_required
 def course_detail(request, course_id):
-    """Детальная информация о курсе"""
     try:
-        # Преобразуем course_id в число
         course_id_int = int(course_id)
         course = get_object_or_404(Course, id=course_id_int)
 
-        # Проверяем права доступа
         if request.user.profile.role == 'teacher':
             if course.teacher != request.user:
                 messages.error(request, '❌ У вас нет доступа к этому курсу.')
                 return redirect('dashboard')
         else:
-            # Для учеников проверяем запись на курс
             if request.user not in course.students.all():
                 messages.error(request, '❌ Вы не записаны на этот курс.')
                 return redirect('dashboard')
 
-        # Обработка POST запросов (только для учителей)
         if request.method == 'POST' and request.user.profile.role == 'teacher':
-            # Создание объявления
             if 'title' in request.POST and 'content' in request.POST:
                 title = request.POST.get('title', '').strip()
                 content = request.POST.get('content', '').strip()
                 post_course_id = request.POST.get('course_id', course_id)
 
                 try:
-                    # Проверяем, что курс принадлежит учителю
                     announcement_course = Course.objects.get(id=post_course_id, teacher=request.user)
 
                     if title and content:
@@ -568,12 +512,10 @@ def course_detail(request, course_id):
 
                 return redirect('course_detail', course_id=course.id)
 
-        # Вычисляем статистику
         assignments = course.assignments.all().order_by('-created_at')
         students = course.students.all().order_by('last_name', 'first_name')
         announcements = course.announcements.all().order_by('-created_at')
 
-        # Вычисляем общее количество решений
         total_submissions = 0
         graded_submissions = 0
         for assignment in assignments:
@@ -601,7 +543,6 @@ def course_detail(request, course_id):
 
 @login_required
 def enroll_course(request, course_id):
-    """Запись на курс (для учеников)"""
     if not student_check(request.user):
         messages.error(request, '❌ Только ученики могут записываться на курсы.')
         return redirect('dashboard')
@@ -609,7 +550,6 @@ def enroll_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
 
     if request.method == 'POST':
-        # Проверяем, не записан ли уже ученик на курс
         if request.user in course.students.all():
             messages.warning(request, f'⚠️ Вы уже записаны на курс "{course.title}"!')
         else:
@@ -626,11 +566,9 @@ def enroll_course(request, course_id):
 
 @login_required
 def profile_view(request):
-    """Просмотр и редактирование профиля"""
     try:
         profile = request.user.profile
     except Profile.DoesNotExist:
-        # Создаем профиль если он не существует
         profile = Profile.objects.create(user=request.user, role='student')
         messages.info(request, '✅ Профиль создан автоматически')
 
@@ -655,7 +593,6 @@ def profile_view(request):
 
 @login_required
 def update_avatar(request):
-    """Обновление аватара"""
     if request.method == 'POST' and request.FILES.get('avatar'):
         try:
             profile = request.user.profile

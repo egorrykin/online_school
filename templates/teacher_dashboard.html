@@ -193,7 +193,6 @@
 
 {% block content %}
 <div class="container">
-  <!-- Заголовок -->
   <div class="dashboard-header">
     <div class="row align-items-center">
       <div class="col-md-8">
@@ -219,7 +218,6 @@
     </div>
   </div>
 
-  <!-- Быстрая статистика -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
@@ -255,7 +253,6 @@
   </div>
 
   <div class="row">
-    <!-- Мои курсы -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -320,7 +317,6 @@
       </div>
     </div>
 
-    <!-- Последние задания -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -372,7 +368,6 @@
   </div>
 
   <div class="row">
-    <!-- Работы на проверку -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -420,7 +415,6 @@
       </div>
     </div>
 
-    <!-- Последние объявления -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -514,7 +508,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Изменяем форму объявления в зависимости от выбранного курса
     const announcementForm = document.getElementById('announcementForm');
     if (announcementForm) {
       const courseSelect = announcementForm.querySelector('select[name="course"]');
@@ -526,7 +519,6 @@
           }
         });
 
-        // Устанавливаем первое значение по умолчанию, только если есть курсы
         if (courseSelect.options.length > 1) {
           const firstOption = courseSelect.options[1];
           if (firstOption && firstOption.value) {

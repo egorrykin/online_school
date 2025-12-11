@@ -165,7 +165,6 @@
       <form method="post" id="registerForm">
         {% csrf_token %}
 
-        <!-- Выбор роли -->
         <div class="form-section">
           <h3 class="section-title">Выберите вашу роль</h3>
 
@@ -210,7 +209,6 @@
           </div>
         </div>
 
-        <!-- Основная информация -->
         <div class="form-section">
           <h3 class="section-title">Основная информация</h3>
 
@@ -258,7 +256,6 @@
           </div>
         </div>
 
-        <!-- Пароль -->
         <div class="form-section">
           <h3 class="section-title">Безопасность</h3>
 
@@ -299,7 +296,6 @@
           </div>
         </div>
 
-        <!-- Соглашение -->
         <div class="form-check mb-4">
           <input class="form-check-input" type="checkbox" id="terms" required>
           <label class="form-check-label" for="terms">
@@ -310,7 +306,6 @@
           </label>
         </div>
 
-        <!-- Кнопка регистрации -->
         <button type="submit" class="btn btn-primary btn-lg w-100">
           <i class="fas fa-user-plus"></i> Создать аккаунт
         </button>
@@ -329,7 +324,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Выбор роли
     window.selectRole = function(role) {
       const studentCard = document.getElementById('studentCard');
       const teacherCard = document.getElementById('teacherCard');
@@ -347,14 +341,12 @@
       }
     };
 
-    // Валидация пароля
     const password1 = document.getElementById('id_password1');
     const password2 = document.getElementById('id_password2');
 
     password1.addEventListener('input', function() {
       const password = this.value;
 
-      // Проверка длины
       const lengthReq = document.getElementById('length-req');
       if (password.length >= 8) {
         lengthReq.classList.add('valid');
@@ -366,7 +358,6 @@
         lengthReq.innerHTML = '<i class="fas fa-times-circle"></i> Минимум 8 символов';
       }
 
-      // Проверка наличия цифр
       const numberReq = document.getElementById('number-req');
       if (/\d/.test(password)) {
         numberReq.classList.add('valid');
@@ -378,7 +369,6 @@
         numberReq.innerHTML = '<i class="fas fa-times-circle"></i> Содержит цифры';
       }
 
-      // Проверка наличия букв
       const letterReq = document.getElementById('letter-req');
       if (/[a-zA-Z]/.test(password)) {
         letterReq.classList.add('valid');
@@ -391,7 +381,6 @@
       }
     });
 
-    // Проверка совпадения паролей
     password2.addEventListener('input', function() {
       if (password1.value !== password2.value && password2.value.length > 0) {
         password2.classList.add('is-invalid');
@@ -400,7 +389,6 @@
       }
     });
 
-    // Автоматический выбор ученика по умолчанию
     selectRole('student');
   });
 </script>

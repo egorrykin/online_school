@@ -50,7 +50,6 @@ class AnnouncementAdmin(admin.ModelAdmin):
     list_filter = ('course', 'author', 'created_at')
     search_fields = ('title', 'content', 'course__title')
 
-# Регистрируем модели
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Course, CourseAdmin)

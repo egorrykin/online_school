@@ -1,6 +1,4 @@
-// Основные JavaScript функции для Online School
 document.addEventListener('DOMContentLoaded', function() {
-    // Анимация при загрузке
     const cards = document.querySelectorAll('.card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
@@ -13,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
     });
 
-    // Валидация форм
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
         form.addEventListener('submit', function(e) {
@@ -47,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Автоматическое скрытие сообщений
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(alert => {
         setTimeout(() => {
@@ -61,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     });
 
-    // Подтверждение удаления
     const deleteButtons = document.querySelectorAll('.btn-delete');
     deleteButtons.forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -71,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Переключение вкладок
     const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -82,7 +76,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Анимация статистики
     const statNumbers = document.querySelectorAll('.stat-number');
     statNumbers.forEach(stat => {
         const text = stat.textContent;
@@ -101,7 +94,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Подсветка активных элементов навигации
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
@@ -110,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Управление видимостью пароля
     const passwordToggles = document.querySelectorAll('.password-toggle');
     passwordToggles.forEach(toggle => {
         toggle.addEventListener('click', function() {
@@ -125,36 +116,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Динамическая загрузка данных (пример)
     window.loadCourseData = function(courseId) {
         fetch(`/api/courses/${courseId}/stats/`)
             .then(response => response.json())
             .then(data => {
-            // Обновление статистики курса
             console.log('Course data loaded:', data);
         })
             .catch(error => console.error('Error loading course data:', error));
     };
 
-    // Инициализация всех компонентов
     initComponents();
 });
 
 function initComponents() {
-    // Инициализация тултипов
     const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltips.forEach(tooltip => {
         new bootstrap.Tooltip(tooltip);
     });
 
-    // Инициализация попапов
     const popovers = document.querySelectorAll('[data-bs-toggle="popover"]');
     popovers.forEach(popover => {
         new bootstrap.Popover(popover);
     });
 }
 
-// Утилиты
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('ru-RU', {
@@ -171,9 +156,7 @@ function truncateText(text, maxLength) {
     return text.substr(0, maxLength) + '...';
 }
 
-// Обработчики событий для улучшения UX
 document.addEventListener('click', function(e) {
-    // Подтверждение действий
     if (e.target.classList.contains('confirm-action')) {
         const message = e.target.dataset.confirmMessage || 'Вы уверены, что хотите выполнить это действие?';
         if (!confirm(message)) {
@@ -182,7 +165,6 @@ document.addEventListener('click', function(e) {
         }
     }
 
-    // Плавная прокрутка к якорям
     if (e.target.hash && e.target.hash.startsWith('#')) {
         e.preventDefault();
         const target = document.querySelector(e.target.hash);

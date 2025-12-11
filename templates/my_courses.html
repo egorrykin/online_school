@@ -227,7 +227,6 @@
 
 {% block content %}
 <div class="container courses-container">
-  <!-- Заголовок -->
   <div class="row mb-5">
     <div class="col-md-8">
       <h1 class="mb-3">
@@ -254,7 +253,6 @@
     </div>
   </div>
 
-  <!-- Вкладки -->
   <ul class="nav nav-tabs" id="coursesTab" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="my-courses-tab" data-bs-toggle="tab" data-bs-target="#my-courses" type="button">
@@ -272,9 +270,7 @@
     {% endif %}
   </ul>
 
-  <!-- Содержимое вкладок -->
   <div class="tab-content" id="coursesTabContent">
-    <!-- Мои курсы -->
     <div class="tab-pane fade show active" id="my-courses" role="tabpanel">
       {% if courses %}
       <div class="courses-grid">
@@ -340,7 +336,6 @@
       {% endif %}
     </div>
 
-    <!-- Доступные курсы (только для учеников) -->
     {% if not is_teacher and available_courses %}
     <div class="tab-pane fade" id="available-courses" role="tabpanel">
       {% if available_courses %}
@@ -389,7 +384,6 @@
     {% endif %}
   </div>
 
-  <!-- Статистика (для учителей) -->
   {% if is_teacher and courses %}
   <div class="card mt-5">
     <div class="card-header">
@@ -442,7 +436,6 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация вкладок
     const triggerTabList = document.querySelectorAll('#coursesTab button');
     triggerTabList.forEach(triggerEl => {
       const tabTrigger = new bootstrap.Tab(triggerEl);
@@ -452,7 +445,6 @@
       });
     });
 
-    // Подтверждение записи на курс
     const enrollForms = document.querySelectorAll('form[action*="enroll_course"]');
     enrollForms.forEach(form => {
       form.addEventListener('submit', function(e) {
@@ -463,7 +455,6 @@
       });
     });
 
-    // Анимация карточек при загрузке
     const courseCards = document.querySelectorAll('.course-card');
     courseCards.forEach((card, index) => {
       card.style.opacity = '0';
@@ -476,7 +467,6 @@
       }, index * 100);
     });
 
-    // Подсветка активной вкладки
     const tabButtons = document.querySelectorAll('.nav-tabs .nav-link');
     tabButtons.forEach(button => {
       button.addEventListener('click', function() {
@@ -485,7 +475,6 @@
       });
     });
 
-    // Анимация статистики
     const statNumbers = document.querySelectorAll('.stat-number');
     statNumbers.forEach(stat => {
       const text = stat.textContent;

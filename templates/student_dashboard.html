@@ -264,7 +264,6 @@
 
 {% block content %}
 <div class="container">
-  <!-- Заголовок -->
   <div class="dashboard-header">
     <div class="row align-items-center">
       <div class="col-md-8">
@@ -298,7 +297,6 @@
     </div>
   </div>
 
-  <!-- Быстрая статистика -->
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
@@ -354,7 +352,6 @@
   </div>
 
   <div class="row">
-    <!-- Активные задания -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -369,7 +366,6 @@
 
           {% if active_assignments or overdue_assignments %}
           <div id="active-assignments">
-            <!-- Просроченные задания -->
             {% for assignment in overdue_assignments|slice:":3" %}
             <div class="assignment-item overdue">
               <div class="assignment-info">
@@ -389,7 +385,6 @@
             </div>
             {% endfor %}
 
-            <!-- Активные задания -->
             {% for assignment in active_assignments|slice:":5" %}
             <div class="assignment-item active">
               <div class="assignment-info">
@@ -431,7 +426,6 @@
       </div>
     </div>
 
-    <!-- Мои курсы -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -500,7 +494,6 @@
   </div>
 
   <div class="row">
-    <!-- Последние оценки -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -564,7 +557,6 @@
       </div>
     </div>
 
-    <!-- Успеваемость -->
     <div class="col-lg-6 mb-4">
       <div class="card">
         <div class="card-body">
@@ -605,7 +597,6 @@
           </div>
           {% endif %}
 
-          <!-- Общая статистика -->
           <div class="mt-4">
             <div class="row text-center">
               <div class="col-4">
@@ -637,7 +628,6 @@
             </div>
           </div>
 
-          <!-- Мотивационное сообщение -->
           <div class="mt-4 pt-3 border-top">
             <div class="alert alert-info">
               <div class="d-flex align-items-center">
@@ -665,13 +655,11 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация тултипов
     const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltips.forEach(tooltip => {
       new bootstrap.Tooltip(tooltip);
     });
 
-    // Расчет процента оценки
     const gradeBadges = document.querySelectorAll('.grade-badge');
     gradeBadges.forEach(badge => {
       const text = badge.textContent;
@@ -681,12 +669,10 @@
         const max = parseInt(match[2]);
         const percentage = (grade / max) * 100;
 
-        // Добавляем процент к тексту
         badge.innerHTML = `${text} <small>(${percentage.toFixed(0)}%)</small>`;
       }
     });
 
-    // Анимация статистики
     const statNumbers = document.querySelectorAll('.stat-number');
     statNumbers.forEach(stat => {
       const text = stat.textContent;
@@ -705,7 +691,6 @@
       }
     });
 
-    // Подсветка просроченных заданий
     const overdueItems = document.querySelectorAll('.assignment-item.overdue');
     overdueItems.forEach(item => {
       item.addEventListener('mouseenter', function() {
@@ -716,13 +701,10 @@
       });
     });
 
-    // Обновление счетчика активных заданий
     function updateAssignmentCount() {
-      // Здесь можно добавить AJAX запрос для получения актуального количества
       console.log('Dashboard loaded successfully');
     }
 
-    // Инициализация
     updateAssignmentCount();
   });
 </script>

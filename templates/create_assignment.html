@@ -179,7 +179,6 @@
       <form method="post" id="createAssignmentForm">
         {% csrf_token %}
 
-        <!-- Основная информация -->
         <div class="form-section">
           <h3 class="section-title">
             <i class="fas fa-info-circle"></i> Основная информация
@@ -238,7 +237,6 @@
           </div>
         </div>
 
-        <!-- Детали задания -->
         <div class="form-section">
           <h3 class="section-title">
             <i class="fas fa-cog"></i> Детали задания
@@ -294,7 +292,6 @@
           </div>
         </div>
 
-        <!-- Кнопки действий -->
         <div class="form-actions">
           <button type="submit" class="btn btn-primary btn-create-assignment">
             <i class="fas fa-plus-circle"></i> Создать задание
@@ -311,7 +308,6 @@
         </div>
       </form>
 
-      <!-- Подсказки -->
       <div class="help-tips">
         <h4 class="help-title">
           <i class="fas fa-lightbulb"></i> Советы по созданию задания
@@ -354,7 +350,6 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Элементы формы
     const titleInput = document.getElementById('id_title');
     const descriptionInput = document.getElementById('id_description');
     const titleCounter = document.getElementById('title-counter');
@@ -363,7 +358,6 @@
     const descriptionLength = document.getElementById('description-length');
     const dueDateInput = document.getElementById('id_due_date');
 
-    // Установить минимальную дату (текущая дата + 1 день)
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -372,13 +366,11 @@
     if (dueDateInput) {
       dueDateInput.min = minDate;
 
-      // Установить значение по умолчанию (текущая дата + 7 дней)
       const defaultDate = new Date(today);
       defaultDate.setDate(defaultDate.getDate() + 7);
       dueDateInput.value = defaultDate.toISOString().slice(0, 16);
     }
 
-    // Обновление счетчиков символов
     function updateCounters() {
       if (titleInput) {
         const titleLengthValue = titleInput.value.length;
@@ -409,27 +401,22 @@
       }
     }
 
-    // Инициализация счетчиков
     updateCounters();
 
-    // Слушатели событий
     if (titleInput) titleInput.addEventListener('input', updateCounters);
     if (descriptionInput) descriptionInput.addEventListener('input', updateCounters);
 
-    // Валидация формы
     const form = document.getElementById('createAssignmentForm');
     if (form) {
       form.addEventListener('submit', function(e) {
         let isValid = true;
 
-        // Проверка названия
         if (titleInput && !titleInput.value.trim()) {
           isValid = false;
           showAlert('Пожалуйста, введите название задания', 'danger');
           titleInput.focus();
         }
 
-        // Проверка курса (если не выбран через курс)
         const courseSelect = document.getElementById('id_course');
         if (courseSelect && !courseSelect.value) {
           isValid = false;
@@ -437,7 +424,6 @@
           courseSelect.focus();
         }
 
-        // Проверка даты
         if (dueDateInput && dueDateInput.value) {
           const selectedDate = new Date(dueDateInput.value);
           if (selectedDate < tomorrow) {
@@ -452,7 +438,6 @@
           return false;
         }
 
-        // Показать индикатор загрузки
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Создание задания...';
@@ -460,13 +445,11 @@
       });
     }
 
-    // Функция показа алерта
     function showAlert(message, type) {
       // Удалить старые алерты
       const oldAlert = document.querySelector('.custom-alert');
       if (oldAlert) oldAlert.remove();
 
-      // Создать новый алерт
       const alert = document.createElement('div');
       alert.className = `alert alert-${type} custom-alert alert-dismissible fade show`;
       alert.innerHTML = `
@@ -474,12 +457,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
 
-      // Вставить перед формой
       if (form) {
         form.parentNode.insertBefore(alert, form);
       }
 
-      // Автоматически скрыть через 5 секунд
       setTimeout(() => {
         if (alert.parentNode) {
           alert.classList.remove('show');
@@ -488,7 +469,6 @@
       }, 5000);
     }
 
-    // Автосохранение черновика
     function autoSave() {
       const assignmentData = {
         title: titleInput ? titleInput.value : '',
@@ -503,13 +483,11 @@
       if (draft) {
         try {
           const data = JSON.parse(draft);
-          // Проверяем, что черновик не старше 24 часов
           if (new Date().getTime() - data.timestamp < 24 * 60 * 60 * 1000) {
             if (titleInput) titleInput.value = data.title || '';
             if (descriptionInput) descriptionInput.value = data.description || '';
             updateCounters();
 
-            // Спросить пользователя, хочет ли он восстановить черновик
             if ((data.title || data.description) && confirm('Найден черновик задания. Восстановить его?')) {
               showAlert('Черновик восстановлен', 'info');
             } else {
@@ -524,14 +502,11 @@
       }
     }
 
-    // Загрузить черновик при загрузке страницы
     loadDraft();
 
-    // Автосохранение
     if (titleInput) titleInput.addEventListener('input', autoSave);
     if (descriptionInput) descriptionInput.addEventListener('input', autoSave);
 
-    // Очистить черновик при успешной отправке формы
     if (form) {
       form.addEventListener('submit', function() {
         localStorage.removeItem('assignment_draft');
