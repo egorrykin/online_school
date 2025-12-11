@@ -106,11 +106,75 @@ class AnnouncementForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Содержание объявления'}),
         }
 
+from django import forms
+from django.contrib.auth.models import User
+from .models import Profile
+
 class ProfileForm(forms.ModelForm):
+    # Добавляем поля из модели User
+    first_name = forms.CharField(
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите ваше имя'
+        })
+    )
+
+    last_name = forms.CharField(
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите вашу фамилию'
+        })
+    )
+
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите ваш email'
+        })
+    )
+
     class Meta:
         model = Profile
-        fields = ['bio', 'phone', 'avatar']
+        fields = ['first_name', 'last_name', 'email', 'bio', 'phone', 'avatar']
         widgets = {
-            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Расскажите о себе...'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+7 (999) 999-99-99'}),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Расскажите о себе...'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+7 (999) 999-99-99'
+            }),
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Устанавливаем начальные значения из связанного пользователя
+        if self.instance and self.instance.user:
+            self.fields['first_name'].initial = self.instance.user.first_name
+            self.fields['last_name'].initial = self.instance.user.last_name
+            self.fields['email'].initial = self.instance.user.email
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+
+        # Сохраняем данные пользователя
+        profile.user.first_name = self.cleaned_data['first_name']
+        profile.user.last_name = self.cleaned_data['last_name']
+        profile.user.email = self.cleaned_data['email']
+        profile.user.save()
+
+        if commit:
+            profile.save()
+
+        return profile

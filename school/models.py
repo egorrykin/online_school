@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models import Avg, Count
+
 class Profile(models.Model):
     ROLE_CHOICES = [
         ('student', 'Ученик'),
@@ -22,6 +26,113 @@ class Profile(models.Model):
     class Meta:
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"
+
+    # Методы для статистики учеников
+    def get_average_grade(self):
+        """Средняя оценка ученика"""
+        if self.role != 'student':
+            return None
+
+        from .models import Submission
+        submissions = Submission.objects.filter(student=self.user, grade__isnull=False)
+        if submissions.exists():
+            avg = submissions.aggregate(Avg('grade'))['grade__avg']
+            return round(avg, 1)
+        return None
+
+    def get_success_rate(self):
+        """Процент выполненных заданий"""
+        if self.role != 'student':
+            return 0
+
+        from .models import Assignment, Submission
+        total_assignments = Assignment.objects.filter(
+            course__students=self.user
+        ).count()
+        completed_assignments = Submission.objects.filter(
+            student=self.user
+        ).count()
+
+        if total_assignments > 0:
+            return round((completed_assignments / total_assignments) * 100)
+        return 0
+
+    # Методы для статистики учителей
+    def get_total_students(self):
+        """Общее количество учеников у учителя"""
+        if self.role != 'teacher':
+            return 0
+
+        from .models import Course
+        return User.objects.filter(
+            profile__role='student',
+            courses_enrolled__teacher=self.user
+        ).distinct().count()
+
+    def get_graded_submissions(self):
+        """Количество проверенных работ"""
+        if self.role != 'teacher':
+            return 0
+
+        from .models import Submission
+        return Submission.objects.filter(
+            assignment__teacher=self.user,
+            grade__isnull=False
+        ).count()
+
+    def get_courses_count(self):
+        """Количество курсов"""
+        if self.role == 'teacher':
+            from .models import Course
+            return Course.objects.filter(teacher=self.user).count()
+        else:
+            return self.user.courses_enrolled.count()
+
+    # В классе Profile удалите метод get_recent_activity или замените его на:
+    def get_recent_activity_list(self):
+        """Последняя активность (простой список)"""
+        activities = []
+
+        if self.role == 'student':
+            from .models import Submission
+            submissions = Submission.objects.filter(
+                student=self.user
+            ).order_by('-submitted_at')[:5]
+            for submission in submissions:
+                activities.append({
+                    'type': 'submission',
+                    'title': f'Отправлено задание: {submission.assignment.title}',
+                    'date': submission.submitted_at,
+                    'grade': submission.grade,
+                    'course': submission.assignment.course.title
+                })
+        else:
+            from .models import Announcement, Assignment
+            announcements = Announcement.objects.filter(
+                author=self.user
+            ).order_by('-created_at')[:3]
+            for announcement in announcements:
+                activities.append({
+                    'type': 'announcement',
+                    'title': f'Создано объявление: {announcement.title}',
+                    'date': announcement.created_at,
+                    'course': announcement.course.title
+                })
+
+            assignments = Assignment.objects.filter(
+                teacher=self.user
+            ).order_by('-created_at')[:2]
+            for assignment in assignments:
+                activities.append({
+                    'type': 'assignment',
+                    'title': f'Создано задание: {assignment.title}',
+                    'date': assignment.created_at,
+                    'course': assignment.course.title
+                })
+
+        # Сортируем по дате
+        activities.sort(key=lambda x: x['date'], reverse=True)
+        return activities[:5]
 
 class Course(models.Model):
     title = models.CharField(max_length=200, verbose_name="Название курса")

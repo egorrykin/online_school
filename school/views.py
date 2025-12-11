@@ -622,3 +622,47 @@ def enroll_course(request, course_id):
     }
 
     return render(request, 'enroll_course.html', context)
+
+
+@login_required
+def profile_view(request):
+    """Просмотр и редактирование профиля"""
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        # Создаем профиль если он не существует
+        profile = Profile.objects.create(user=request.user, role='student')
+        messages.info(request, '✅ Профиль создан автоматически')
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Профиль успешно обновлен!')
+            return redirect('profile')
+        else:
+            messages.error(request, '❌ Пожалуйста, исправьте ошибки в форме.')
+    else:
+        form = ProfileForm(instance=profile)
+
+    context = {
+        'profile': profile,
+        'form': form,
+    }
+
+    return render(request, 'profile.html', context)
+
+
+@login_required
+def update_avatar(request):
+    """Обновление аватара"""
+    if request.method == 'POST' and request.FILES.get('avatar'):
+        try:
+            profile = request.user.profile
+            profile.avatar = request.FILES['avatar']
+            profile.save()
+            messages.success(request, '✅ Аватар успешно обновлен!')
+        except Exception as e:
+            messages.error(request, f'❌ Ошибка при загрузке аватара: {str(e)}')
+
+    return redirect('profile')

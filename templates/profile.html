@@ -1,0 +1,714 @@
+{% extends 'base.html' %}
+
+{% block title %}Online School - Мой профиль{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+
+    .avatar-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .role-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid white;
+    }
+
+    .role-badge.teacher {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    .role-badge.student {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+
+    .profile-card {
+        border: none;
+        border-radius: 1rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        overflow: hidden;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .card-header-gradient {
+        background: linear-gradient(135deg, #43e97b, #38f9d7);
+        color: white;
+        padding: 1.5rem;
+        border-bottom: none;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-circle {
+        width: 120px;
+        height: 120px;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .progress-value {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .badge-custom {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+    }
+
+    .form-control, .form-select, textarea.form-control {
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus, .form-select:focus, textarea.form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .nav-tabs-custom {
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 2rem;
+    }
+
+    .nav-tabs-custom .nav-link {
+        border: none;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 0.75rem 1.5rem;
+        color: #6c757d;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .nav-tabs-custom .nav-link.active {
+        color: #667eea;
+        background-color: rgba(102, 126, 234, 0.1);
+        border-bottom: 3px solid #667eea;
+    }
+
+    .activity-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f1f1;
+        transition: background-color 0.3s;
+    }
+
+    .activity-item:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+        border-radius: 0.5rem;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+
+    .avatar-preview {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Заголовок профиля -->
+<div class="profile-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-3 text-center">
+                <div class="avatar-container mb-3">
+                    {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Аватар" class="profile-avatar">
+                    {% else %}
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                         alt="Аватар" class="profile-avatar">
+                    {% endif %}
+                    <div class="role-badge {{ profile.role }}">
+                        {% if profile.role == 'teacher' %}
+                        <i class="fas fa-chalkboard-teacher text-white"></i>
+                        {% else %}
+                        <i class="fas fa-user-graduate text-white"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <button class="btn btn-light btn-sm" onclick="document.getElementById('avatarInput').click();">
+                    <i class="fas fa-camera"></i> Изменить фото
+                </button>
+            </div>
+
+            <div class="col-lg-9">
+                <h1 class="display-5 mb-2">
+                    {{ user.get_full_name|default:user.username }}
+                    {% if profile.role == 'teacher' %}
+                    <span class="badge bg-warning ms-2">Преподаватель</span>
+                    {% else %}
+                    <span class="badge bg-info ms-2">Ученик</span>
+                    {% endif %}
+                </h1>
+                <p class="lead mb-3">{{ user.email }}</p>
+                <div class="d-flex flex-wrap gap-2">
+          <span class="badge badge-custom bg-light text-dark">
+            <i class="fas fa-calendar-alt me-1"></i>
+            Присоединился: {{ user.date_joined|date:"d.m.Y" }}
+          </span>
+                    <span class="badge badge-custom bg-light text-dark">
+            <i class="fas fa-sign-in-alt me-1"></i>
+            Последний вход: {% if user.last_login %}{{ user.last_login|timesince }} назад{% else %}Никогда{% endif %}
+          </span>
+                    <span class="badge badge-custom bg-success">
+            <i class="fas fa-book me-1"></i>
+            {% if profile.role == 'teacher' %}
+              Курсов: {{ profile.get_courses_count }}
+            {% else %}
+              Курсов: {{ user.courses_enrolled.count }}
+            {% endif %}
+          </span>
+                    {% if profile.role == 'student' and profile.get_average_grade %}
+                    <span class="badge badge-custom bg-warning">
+              <i class="fas fa-star me-1"></i>
+              Средний балл: {{ profile.get_average_grade }}
+            </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Навигация по профилю -->
+    <ul class="nav nav-tabs nav-tabs-custom" id="profileTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit" type="button" role="tab">
+                <i class="fas fa-edit me-2"></i>Редактировать профиль
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">
+                <i class="fas fa-chart-line me-2"></i>Статистика
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+                <i class="fas fa-history me-2"></i>Активность
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="profileTabContent">
+        <!-- Вкладка редактирования -->
+        <div class="tab-pane fade show active" id="edit" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card profile-card mb-4">
+                        <div class="card-header card-header-gradient">
+                            <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Основная информация</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.first_name.id_for_label }}" class="form-label">Имя</label>
+                                        {{ form.first_name }}
+                                        {% if form.first_name.errors %}
+                                        <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="{{ form.last_name.id_for_label }}" class="form-label">Фамилия</label>
+                                        {{ form.last_name }}
+                                        {% if form.last_name.errors %}
+                                        <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                        {{ form.email }}
+                                        {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label for="{{ form.phone.id_for_label }}" class="form-label">Телефон</label>
+                                        {{ form.phone }}
+                                        {% if form.phone.errors %}
+                                        <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label for="{{ form.bio.id_for_label }}" class="form-label">Биография</label>
+                                        {{ form.bio }}
+                                        {% if form.bio.errors %}
+                                        <div class="text-danger small mt-1">{{ form.bio.errors }}</div>
+                                        {% endif %}
+                                        <div class="form-text">Расскажите о себе, своих интересах или опыте</div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <label for="{{ form.avatar.id_for_label }}" class="form-label">Аватар</label>
+                                        <input type="file" name="avatar" id="avatarInput" class="form-control" accept="image/*" onchange="previewAvatar(this)">
+                                        {% if form.avatar.errors %}
+                                        <div class="text-danger small mt-1">{{ form.avatar.errors }}</div>
+                                        {% endif %}
+                                        {% if profile.avatar %}
+                                        <div class="mt-2">
+                                            <small>Текущий аватар:</small>
+                                            <img src="{{ profile.avatar.url }}" alt="Текущий аватар" class="avatar-preview" id="currentAvatar">
+                                        </div>
+                                        {% endif %}
+                                        <div id="avatarPreviewContainer" class="mt-2" style="display: none;">
+                                            <small>Превью нового аватара:</small>
+                                            <img id="avatarPreview" class="avatar-preview" alt="Превью аватара">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 mt-4">
+                                        <button type="submit" class="btn btn-save">
+                                            <i class="fas fa-save me-2"></i>Сохранить изменения
+                                        </button>
+                                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary ms-2">
+                                            <i class="fas fa-times me-2"></i>Отмена
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Статистика в боковой панели -->
+                    <div class="card profile-card mb-4">
+                        <div class="card-header card-header-gradient">
+                            <h4 class="mb-0"><i class="fas fa-trophy me-2"></i>Достижения</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if profile.role == 'student' %}
+                            <div class="text-center mb-4">
+                                <div class="progress-circle">
+                                    <div class="progress-value">
+                                        {{ profile.get_success_rate }}%
+                                    </div>
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#667eea" stroke-width="10"
+                                                stroke-dasharray="339.292"
+                                                stroke-dashoffset="{% widthratio profile.get_success_rate 100 339.292 %}"
+                                                stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                                    </svg>
+                                </div>
+                                <h5 class="mt-3">Процент выполненных заданий</h5>
+                            </div>
+
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-book text-primary me-2"></i>Записан на курсов</span>
+                                    <span class="badge bg-primary rounded-pill">{{ user.courses_enrolled.count }}</span>
+                                </div>
+                                {% if profile.get_average_grade %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-star text-warning me-2"></i>Средний балл</span>
+                                    <span class="badge bg-warning rounded-pill">{{ profile.get_average_grade }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-user text-info me-2"></i>Статус</span>
+                                    <span class="badge bg-info rounded-pill">{{ profile.get_role_display }}</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center mb-4">
+                                <div class="stat-number">{{ profile.get_courses_count }}</div>
+                                <h5>Созданных курсов</h5>
+                            </div>
+
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-users text-info me-2"></i>Всего учеников</span>
+                                    <span class="badge bg-info rounded-pill">{{ profile.get_total_students }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-check-circle text-success me-2"></i>Проверено работ</span>
+                                    <span class="badge bg-success rounded-pill">{{ profile.get_graded_submissions }}</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="fas fa-chalkboard-teacher text-primary me-2"></i>Статус</span>
+                                    <span class="badge bg-primary rounded-pill">{{ profile.get_role_display }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Быстрые ссылки -->
+                    <div class="card profile-card">
+                        <div class="card-header card-header-gradient">
+                            <h4 class="mb-0"><i class="fas fa-bolt me-2"></i>Быстрые действия</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                {% if profile.role == 'teacher' %}
+                                <a href="{% url 'create_course' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus-circle me-2"></i>Создать новый курс
+                                </a>
+                                <a href="{% url 'teacher_statistics' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-chart-bar me-2"></i>Посмотреть статистику
+                                </a>
+                                {% else %}
+                                <a href="{% url 'my_courses' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-book me-2"></i>Мои курсы
+                                </a>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-success">
+                                    <i class="fas fa-tasks me-2"></i>Мои задания
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-tachometer-alt me-2"></i>На главную
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка статистики -->
+        <div class="tab-pane fade" id="stats" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card profile-card">
+                        <div class="card-header card-header-gradient">
+                            <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Подробная статистика</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                {% if profile.role == 'student' %}
+                                <!-- Статистика ученика -->
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-graduation-cap text-primary me-2"></i>Прогресс обучения</h5>
+                                    <div class="mt-4">
+                                        <h6>Задания по курсам:</h6>
+                                        {% for course in user.courses_enrolled.all %}
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>{{ course.title|truncatechars:30 }}</span>
+                                                <span>
+                              {{ course.submissions.count }}/{{ course.assignments.count }}
+                            </span>
+                                            </div>
+                                            <div class="progress" style="height: 8px;">
+                                                {% if course.assignments.count > 0 %}
+                                                <div class="progress-bar" role="progressbar"
+                                                     style="width: {% widthratio course.submissions.count course.assignments.count 100 %}%">
+                                                </div>
+                                                {% else %}
+                                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted">Вы еще не записаны на курсы</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-star text-warning me-2"></i>Оценки</h5>
+                                    <div class="mt-4">
+                                        <canvas id="gradesChart" height="200"></canvas>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <!-- Статистика учителя -->
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-chalkboard-teacher text-success me-2"></i>Статистика курсов</h5>
+                                    <div class="mt-4">
+                                        {% for course in courses_taught %}
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <h6>{{ course.title|truncatechars:30 }}</h6>
+                                                <div class="row text-center mt-3">
+                                                    <div class="col-4">
+                                                        <div class="stat-number">{{ course.students.count }}</div>
+                                                        <small>Учеников</small>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="stat-number">{{ course.assignments.count }}</div>
+                                                        <small>Заданий</small>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="stat-number">
+                                                            {% if course.get_average_grade %}
+                                                            {{ course.get_average_grade }}
+                                                            {% else %}
+                                                            -
+                                                            {% endif %}
+                                                        </div>
+                                                        <small>Средний балл</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <p class="text-muted">У вас пока нет курсов</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-chart-line text-info me-2"></i>Общая статистика</h5>
+                                    <div class="mt-4">
+                                        <div class="row text-center">
+                                            <div class="col-6 mb-4">
+                                                <div class="stat-number">{{ profile.get_courses_count }}</div>
+                                                <small>Курсов</small>
+                                            </div>
+                                            <div class="col-6 mb-4">
+                                                <div class="stat-number">{{ profile.get_total_students }}</div>
+                                                <small>Учеников</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="stat-number">{{ profile.get_graded_submissions }}</div>
+                                                <small>Проверено работ</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="stat-number">
+                                                    {{ announcements_count|default:0 }}
+                                                </div>
+                                                <small>Объявлений</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка активности -->
+        <div class="tab-pane fade" id="activity" role="tabpanel">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card profile-card">
+                        <div class="card-header card-header-gradient">
+                            <h4 class="mb-0"><i class="fas fa-history me-2"></i>Последняя активность</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if profile.role == 'student' %}
+                            <!-- Активность ученика -->
+                            {% for submission in recent_submissions %}
+                            <div class="activity-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="activity-icon bg-primary text-white">
+                                        <i class="fas fa-file-upload"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Отправлено задание: {{ submission.assignment.title|truncatechars:40 }}</h6>
+                                        <small class="text-muted">{{ submission.submitted_at|date:"d.m.Y H:i" }}</small>
+                                    </div>
+                                    <div>
+                                        {% if submission.grade %}
+                                        <span class="badge bg-success">Оценка: {{ submission.grade }}</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">На проверке</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Активность отсутствует</p>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <!-- Активность учителя -->
+                            {% for announcement in recent_announcements %}
+                            <div class="activity-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="activity-icon bg-success text-white">
+                                        <i class="fas fa-bullhorn"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Создано объявление: {{ announcement.title|truncatechars:40 }}</h6>
+                                        <small class="text-muted">{{ announcement.created_at|date:"d.m.Y H:i" }}</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-info">{{ announcement.course.title|truncatechars:20 }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% for assignment in recent_assignments %}
+                            <div class="activity-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="activity-icon bg-info text-white">
+                                        <i class="fas fa-tasks"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">Создано задание: {{ assignment.title|truncatechars:40 }}</h6>
+                                        <small class="text-muted">{{ assignment.created_at|date:"d.m.Y H:i" }}</small>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-primary">{{ assignment.course.title|truncatechars:20 }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% if not recent_announcements and not recent_assignments %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chalkboard-teacher fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Активность отсутствует</p>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Функция предпросмотра аватара
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewContainer = document.getElementById('avatarPreviewContainer');
+                const previewImg = document.getElementById('avatarPreview');
+                previewImg.src = e.target.result;
+                previewContainer.style.display = 'block';
+
+                // Скрываем текущий аватар
+                const currentAvatar = document.getElementById('currentAvatar');
+                if (currentAvatar) {
+                    currentAvatar.style.display = 'none';
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Инициализация графиков
+    document.addEventListener('DOMContentLoaded', function() {
+    {% if profile.role == 'student' %}
+    // График оценок для ученика
+    const gradesCtx = document.getElementById('gradesChart');
+    if (gradesCtx) {
+        new Chart(gradesCtx, {
+            type: 'line',
+            data: {
+                labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн'],
+                datasets: [{
+                    label: 'Оценки',
+                    data: [85, 88, 82, 90, 87, 92],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50,
+                        max: 100,
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+    });
+</script>
+{% endblock %}
