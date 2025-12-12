@@ -1,6 +1,6 @@
 from django.urls import path
 from school import views
-
+from django.contrib import admin
 urlpatterns = [
     path("", views.home, name="home"),
     path("register/", views.register_view, name="register"),
@@ -36,4 +36,6 @@ urlpatterns = [
         name="grade_submission",
     ),
     path("statistics/", views.teacher_statistics, name="teacher_statistics"),
-]
+
+    path('admin/', admin.site.urls),
+    ]
