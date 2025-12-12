@@ -1,30 +1,732 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ assignment.title }} - Online School{% endblock %}
 
+{% block extra_css %}
+<style>
+  .assignment-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+  }
+
+  .status-badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+
+  .submission-card {
+    border-left: 4px solid;
+    transition: all 0.3s;
+  }
+
+  .submission-card:hover {
+    transform: translateX(5px);
+  }
+
+  .submission-graded {
+    border-left-color: #28a745;
+  }
+
+  .submission-pending {
+    border-left-color: #ffc107;
+  }
+
+  .submission-late {
+    border-left-color: #dc3545;
+  }
+
+  .info-box {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .deadline-box {
+    background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+    border: 2px solid #e17055;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .deadline-overdue {
+    background: linear-gradient(135deg, #fd79a8, #e84393);
+    color: white;
+    border-color: #fd79a8;
+  }
+
+  .progress-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(#28a745 0% var(--progress), #e9ecef var(--progress) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .progress-circle-inner {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .student-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .student-list-item:last-child {
+    border-bottom: none;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container">
-  <nav aria-label="breadcrumb">
+<div class="container py-4">
+  <!-- Хлебные крошки -->
+  <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Панель управления</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Главная</a></li>
       <li class="breadcrumb-item"><a href="{% url 'my_courses' %}">Мои курсы</a></li>
       <li class="breadcrumb-item"><a href="{% url 'course_detail' assignment.course.id %}">{{ assignment.course.title }}</a></li>
-      <li class="breadcrumb-item active">{{ assignment.title }}</li>
+      <li class="breadcrumb-item active">{{ assignment.title|truncatechars:30 }}</li>
     </ol>
   </nav>
 
-  <h1>{{ assignment.title }}</h1>
-
-  <div class="card">
-    <div class="card-body">
-      <p>{{ assignment.description|linebreaks }}</p>
-
-      <div class="mt-4">
-        <p><strong>Срок сдачи:</strong> {{ assignment.due_date|date:"d.m.Y H:i" }}</p>
-        <p><strong>Максимальный балл:</strong> {{ assignment.max_points }}</p>
-        <p><strong>Статус:</strong> {{ assignment.get_status_display }}</p>
+  <!-- Заголовок задания -->
+  <div class="assignment-header">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="mb-3">{{ assignment.title }}</h1>
+        <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-light text-dark status-badge">
+                        <i class="fas fa-book me-1"></i>{{ assignment.course.title }}
+                    </span>
+          <span class="badge {% if assignment.status == 'published' %}bg-success
+                                      {% elif assignment.status == 'closed' %}bg-secondary
+                                      {% else %}bg-warning{% endif %} status-badge">
+                        {{ assignment.get_status_display }}
+                    </span>
+          {% if assignment.is_overdue %}
+          <span class="badge bg-danger status-badge">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Просрочено
+                    </span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-4 text-end">
+        <div class="h2 mb-0">{{ assignment.max_points }}</div>
+        <small>максимальный балл</small>
       </div>
     </div>
   </div>
+
+  <div class="row">
+    <!-- Основной контент -->
+    <div class="col-lg-8">
+      <!-- Информация о дедлайне -->
+      <div class="deadline-box {% if assignment.is_overdue %}deadline-overdue{% endif %}">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h4 class="mb-2">
+              <i class="fas fa-clock me-2"></i>
+              {% if assignment.is_overdue %}
+              Срок сдачи истёк
+              {% else %}
+              До сдачи осталось
+              {% endif %}
+            </h4>
+            <h2 class="display-6 fw-bold mb-0">
+              {% if assignment.is_overdue %}
+              Просрочено
+              {% else %}
+              {{ assignment.due_date|timeuntil }}
+              {% endif %}
+            </h2>
+            <p class="mb-0 mt-2">
+              <i class="far fa-calendar-alt me-1"></i>
+              Сдать до: {{ assignment.due_date|date:"d.m.Y H:i" }}
+            </p>
+          </div>
+          <div class="col-md-4 text-end">
+            <i class="fas fa-calendar-times fa-3x"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Описание задания -->
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h3 class="card-title h5 mb-0">
+            <i class="fas fa-align-left me-2"></i>Описание задания
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="description-content">
+            {{ assignment.description|linebreaks }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Для учеников: блок сдачи задания -->
+      {% if is_student %}
+      {% if submission %}
+      <div class="card mb-4 submission-card submission-{% if submission.grade %}graded{% else %}pending{% endif %}">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h3 class="card-title h5 mb-0">
+            <i class="fas fa-file-upload me-2"></i>Ваше решение
+          </h3>
+          <span class="badge {% if submission.grade %}bg-success{% else %}bg-warning{% endif %}">
+                                {% if submission.grade %}
+                                    Оценено: {{ submission.grade }}/{{ assignment.max_points }}
+                                {% else %}
+                                    На проверке
+                                {% endif %}
+                            </span>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p class="mb-1"><strong>Отправлено:</strong> {{ submission.submitted_at|date:"d.m.Y H:i" }}</p>
+              {% if submission.is_late %}
+              <p class="mb-1 text-danger">
+                <i class="fas fa-exclamation-triangle me-1"></i>Отправлено после дедлайна
+              </p>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {% if submission.file %}
+              <p class="mb-1">
+                <strong>Файл:</strong>
+                <a href="{{ submission.file.url }}" target="_blank" class="text-decoration-none">
+                  <i class="fas fa-download me-1"></i>{{ submission.file.name|slice:"20:" }}
+                </a>
+              </p>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if submission.content %}
+          <div class="mb-3">
+            <h6 class="mb-2">Текстовое решение:</h6>
+            <div class="border rounded p-3 bg-light">
+              {{ submission.content|linebreaks }}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if submission.feedback %}
+          <div class="alert alert-success">
+            <h6 class="alert-heading">
+              <i class="fas fa-comment-dots me-2"></i>Комментарий учителя:
+            </h6>
+            <p class="mb-0">{{ submission.feedback|linebreaks }}</p>
+          </div>
+          {% endif %}
+
+          <div class="action-buttons">
+            <a href="{% url 'view_submission' submission.id %}" class="btn btn-primary">
+              <i class="fas fa-eye me-1"></i> Подробный просмотр
+            </a>
+            <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-outline-primary">
+              <i class="fas fa-edit me-1"></i> Обновить решение
+            </a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h3 class="card-title h5 mb-0">
+            <i class="fas fa-paper-plane me-2"></i>Сдать задание
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="text-center py-4">
+            {% if assignment.is_overdue %}
+            <div class="alert alert-danger mb-4">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              <strong>Внимание!</strong> Срок сдачи задания истёк.
+              Вы всё ещё можете отправить решение, но оно будет отмечено как просроченное.
+            </div>
+            {% else %}
+            <div class="alert alert-info mb-4">
+              <i class="fas fa-info-circle me-2"></i>
+              У вас есть время до {{ assignment.due_date|date:"d.m.Y H:i" }} чтобы сдать задание
+            </div>
+            {% endif %}
+
+            <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-success btn-lg px-5">
+              <i class="fas fa-paper-plane me-2"></i> Сдать задание
+            </a>
+
+            <p class="mt-3 text-muted">
+              Нажмите кнопку, чтобы отправить текстовое решение или прикрепить файл
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% endif %}
+
+      <!-- Для учителей: список сданных работ -->
+      {% if is_teacher %}
+      <div class="card mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h3 class="card-title h5 mb-0">
+            <i class="fas fa-list-check me-2"></i>Сданные работы
+            <span class="badge bg-primary ms-2">{{ submissions.count }}</span>
+          </h3>
+          <a href="{% url 'submissions_list' assignment.id %}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-external-link-alt me-1"></i> Все работы
+          </a>
+        </div>
+        <div class="card-body">
+          {% if submissions %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+              <tr>
+                <th>Ученик</th>
+                <th>Дата сдачи</th>
+                <th>Статус</th>
+                <th>Оценка</th>
+                <th>Действия</th>
+              </tr>
+              </thead>
+              <tbody>
+              {% for sub in submissions|slice:":5" %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                      {% if sub.student.profile.avatar %}
+                      <img src="{{ sub.student.profile.avatar.url }}"
+                           alt="{{ sub.student.get_full_name }}"
+                           class="rounded-circle"
+                           style="width: 30px; height: 30px; object-fit: cover;">
+                      {% else %}
+                      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                           style="width: 30px; height: 30px;">
+                        {{ sub.student.first_name|first }}{{ sub.student.last_name|first }}
+                      </div>
+                      {% endif %}
+                    </div>
+                    <div class="flex-grow-1 ms-2">
+                      {{ sub.student.get_full_name }}
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  {{ sub.submitted_at|date:"d.m.Y H:i" }}
+                  {% if sub.is_late %}
+                  <br><small class="text-danger">(просрочено)</small>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if sub.grade %}
+                  <span class="badge bg-success">Проверено</span>
+                  {% else %}
+                  <span class="badge bg-warning">Ожидает проверки</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if sub.grade %}
+                  <span class="badge {% if sub.grade >= 80 %}bg-success
+                                                                       {% elif sub.grade >= 60 %}bg-warning
+                                                                       {% else %}bg-danger{% endif %}">
+                                                        {{ sub.grade }}/{{ assignment.max_points }}
+                                                    </span>
+                  {% else %}
+                  <span class="text-muted">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="{% url 'grade_submission' sub.id %}"
+                       class="btn btn-outline-primary" title="Оценить">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'view_submission' sub.id %}"
+                       class="btn btn-outline-info" title="Просмотреть">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if submissions.count > 5 %}
+          <div class="text-center mt-3">
+            <a href="{% url 'submissions_list' assignment.id %}" class="btn btn-outline-primary">
+              Показать все работы ({{ submissions.count }})
+            </a>
+          </div>
+          {% endif %}
+          {% else %}
+          <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Работы ещё не сданы</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Статистика по заданию -->
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h3 class="card-title h5 mb-0">
+            <i class="fas fa-chart-bar me-2"></i>Статистика задания
+          </h3>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-3 mb-3">
+              <div class="info-box">
+                <div class="h2 mb-0">{{ assignment.course.students.count }}</div>
+                <small>Учеников в курсе</small>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="info-box">
+                <div class="h2 mb-0 text-primary">{{ submissions.count }}</div>
+                <small>Сдано работ</small>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="info-box">
+                <div class="h2 mb-0 text-success">{{ graded_count }}</div>
+                <small>Проверено</small>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="info-box">
+                <div class="h2 mb-0 text-warning">{{ pending_count }}</div>
+                <small>Ожидает проверки</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Средний балл -->
+          {% if graded_count > 0 %}
+          <div class="mt-4">
+            <h6>Средний балл: {{ avg_grade|floatformat:1 }}/{{ assignment.max_points }}</h6>
+            <div class="progress" style="height: 10px;">
+              <div class="progress-bar bg-success"
+                   style="width: {% widthratio avg_grade assignment.max_points 100 %}%">
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Боковая панель -->
+    <div class="col-lg-4">
+      <!-- Информация о курсе -->
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-info-circle me-2"></i>Информация
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <h6>Курс:</h6>
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                     style="width: 40px; height: 40px;">
+                  <i class="fas fa-book"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <a href="{% url 'course_detail' assignment.course.id %}"
+                   class="text-decoration-none">
+                  {{ assignment.course.title }}
+                </a>
+                <small class="d-block text-muted">{{ assignment.course.teacher.get_full_name }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <h6>Детали задания:</h6>
+            <ul class="list-unstyled mb-0">
+              <li class="mb-2">
+                <i class="fas fa-calendar-plus me-2 text-primary"></i>
+                <strong>Создано:</strong> {{ assignment.created_at|date:"d.m.Y" }}
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-clock me-2 text-primary"></i>
+                <strong>Срок сдачи:</strong> {{ assignment.due_date|date:"d.m.Y H:i" }}
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-star me-2 text-primary"></i>
+                <strong>Макс. баллов:</strong> {{ assignment.max_points }}
+              </li>
+              <li>
+                <i class="fas fa-tag me-2 text-primary"></i>
+                <strong>Статус:</strong> {{ assignment.get_status_display }}
+              </li>
+            </ul>
+          </div>
+
+          {% if is_teacher %}
+          <div class="mt-4">
+            <h6>Быстрые действия:</h6>
+            <div class="d-grid gap-2">
+              <a href="{% url 'submissions_list' assignment.id %}" class="btn btn-primary">
+                <i class="fas fa-list-check me-1"></i> Проверить работы
+              </a>
+              <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAssignmentModal">
+                <i class="fas fa-edit me-1"></i> Редактировать
+              </button>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Прогресс выполнения -->
+      <div class="card mb-4">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-chart-line me-2"></i>Прогресс
+          </h5>
+        </div>
+        <div class="card-body text-center">
+          {% if is_student %}
+          {% if submission %}
+          {% if submission.grade %}
+          <div style="--progress: {% widthratio submission.grade assignment.max_points 100 %}%">
+            <div class="progress-circle">
+              <div class="progress-circle-inner">
+                {% widthratio submission.grade assignment.max_points 100 %}%
+              </div>
+            </div>
+          </div>
+          <h4 class="mt-3">{{ submission.grade }}/{{ assignment.max_points }}</h4>
+          <p class="text-muted">Ваша оценка</p>
+          {% else %}
+          <div style="--progress: 100%">
+            <div class="progress-circle" style="background: conic-gradient(#ffc107 0% 100%, #e9ecef 100% 100%);">
+              <div class="progress-circle-inner">
+                <i class="fas fa-clock text-warning fa-2x"></i>
+              </div>
+            </div>
+          </div>
+          <h4 class="mt-3">На проверке</h4>
+          <p class="text-muted">Ожидайте оценки учителя</p>
+          {% endif %}
+          {% else %}
+          <div style="--progress: 0%">
+            <div class="progress-circle" style="background: conic-gradient(#dc3545 0% 100%, #e9ecef 100% 100%);">
+              <div class="progress-circle-inner">
+                <i class="fas fa-times text-danger fa-2x"></i>
+              </div>
+            </div>
+          </div>
+          <h4 class="mt-3">Не сдано</h4>
+          <p class="text-muted">Вы ещё не сдавали это задание</p>
+          {% endif %}
+          {% else %}
+          <!-- Для учителей: статистика класса -->
+          <div class="row text-center">
+            <div class="col-6">
+              <div class="h2 text-primary mb-0">
+                {% if assignment.course.students.count > 0 %}
+                {% widthratio submissions.count assignment.course.students.count 100 %}%
+                {% else %}
+                0%
+                {% endif %}
+              </div>
+              <small>Сдали</small>
+            </div>
+            <div class="col-6">
+              <div class="h2 text-success mb-0">
+                {{ graded_count }}
+              </div>
+              <small>Проверено</small>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Студенты курса (для учителей) -->
+      {% if is_teacher %}
+      <div class="card">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-users me-2"></i>Ученики курса
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            {% for student in assignment.course.students.all|slice:":5" %}
+            <div class="student-list-item">
+              <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                  {% if student.profile.avatar %}
+                  <img src="{{ student.profile.avatar.url }}"
+                       alt="{{ student.get_full_name }}"
+                       class="rounded-circle"
+                       style="width: 35px; height: 35px; object-fit: cover;">
+                  {% else %}
+                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                       style="width: 35px; height: 35px; font-size: 0.8rem;">
+                    {{ student.first_name|first }}{{ student.last_name|first }}
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="flex-grow-1 ms-3">
+                  <div class="fw-medium">{{ student.get_full_name }}</div>
+                  <small class="text-muted">
+                    {% for sub in submissions %}
+                    {% if sub.student == student %}
+                    {% if sub.grade %}
+                    {{ sub.grade }}/{{ assignment.max_points }}
+                    {% else %}
+                    Сдано
+                    {% endif %}
+                    {% else %}
+                    {% if forloop.last %}Не сдано{% endif %}
+                    {% endif %}
+                    {% empty %}
+                    Не сдано
+                    {% endfor %}
+                  </small>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% if assignment.course.students.count > 5 %}
+          <div class="text-center p-3 border-top">
+            <a href="{% url 'course_detail' assignment.course.id %}" class="text-decoration-none">
+              Все ученики ({{ assignment.course.students.count }})
+              <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
+
+<!-- Модальное окно редактирования задания (для учителей) -->
+{% if is_teacher %}
+<div class="modal fade" id="editAssignmentModal" tabindex="-1" aria-labelledby="editAssignmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editAssignmentModalLabel">
+          <i class="fas fa-edit me-2"></i>Редактировать задание
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="#">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Название задания</label>
+            <input type="text" class="form-control" value="{{ assignment.title }}" name="title">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Описание</label>
+            <textarea class="form-control" rows="4" name="description">{{ assignment.description }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Срок сдачи</label>
+            <input type="datetime-local" class="form-control"
+                   value="{{ assignment.due_date|date:'Y-m-d\\TH:i' }}" name="due_date">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Максимальный балл</label>
+            <input type="number" class="form-control" value="{{ assignment.max_points }}" name="max_points">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Обновление таймера дедлайна
+  function updateDeadlineTimer() {
+    const dueDate = new Date("{{ assignment.due_date.isoformat }}");
+    const now = new Date();
+    const diffMs = dueDate - now;
+
+    if (diffMs <= 0) {
+      document.querySelector('.deadline-box h2').textContent = 'Просрочено';
+      document.querySelector('.deadline-box h4').innerHTML = '<i class="fas fa-clock me-2"></i>Срок сдачи истёк';
+      document.querySelector('.deadline-box').classList.add('deadline-overdue');
+      return;
+    }
+
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    let timeString = '';
+    if (diffDays > 0) {
+      timeString = `${diffDays} дн ${diffHours} ч`;
+    } else if (diffHours > 0) {
+      timeString = `${diffHours} ч ${diffMinutes} мин`;
+    } else {
+      timeString = `${diffMinutes} мин`;
+    }
+
+    document.querySelector('.deadline-box h2').textContent = timeString;
+  }
+
+  // Обновляем таймер каждую минуту
+  updateDeadlineTimer();
+  setInterval(updateDeadlineTimer, 60000);
+
+  // Подсветка просроченных заданий
+  {% if assignment.is_overdue %}
+        document.querySelector('.assignment-header').style.background = 'linear-gradient(135deg, #fd79a8 0%, #e84393 100%)';
+  {% endif %}
+</script>
 {% endblock %}

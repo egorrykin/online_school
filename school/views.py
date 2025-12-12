@@ -175,7 +175,7 @@ def student_dashboard(request):
 
     recent_submissions = Submission.objects.filter(student=request.user).order_by(
         "-submitted_at"
-    )[:5]
+    )[:10]  # Увеличим до 10 для таблицы
 
     grades = (
         Submission.objects.filter(student=request.user, grade__isnull=False)
@@ -183,12 +183,10 @@ def student_dashboard(request):
         .annotate(avg_grade=Avg("grade"))
     )
 
-    student_submissions_count = {}
-    for course in courses:
-        for student in course.students.all():
-            student_submissions_count[student.id] = student.submissions.filter(
-                assignment__course=course
-            ).count()
+    # Получаем ID заданий, которые уже сданы
+    submitted_assignments = Submission.objects.filter(
+        student=request.user
+    ).values_list('assignment_id', flat=True)
 
     context = {
         "courses": courses,
@@ -196,11 +194,10 @@ def student_dashboard(request):
         "overdue_assignments": overdue_assignments,
         "recent_submissions": recent_submissions,
         "grades": grades,
-        "student_submissions_count": student_submissions_count,
+        "submitted_assignments": submitted_assignments,
     }
 
     return render(request, "student_dashboard.html", context)
-
 
 @login_required
 @user_passes_test(teacher_check, login_url="/dashboard/")
@@ -224,56 +221,7 @@ def create_course(request):
     return render(request, "create_course.html", {"form": form})
 
 
-@login_required
-@user_passes_test(teacher_check, login_url="/dashboard/")
-def course_detail(request, course_id):
-    """Детальная информация о курсе"""
-    course = get_object_or_404(Course, id=course_id, teacher=request.user)
 
-    if request.method == "POST" and "add_student" in request.POST:
-        student_id = request.POST.get("student_id")
-        student = get_object_or_404(User, id=student_id, profile__role="student")
-        course.students.add(student)
-        messages.success(
-            request, f"✅ Ученик {student.get_full_name()} добавлен в курс!"
-        )
-        return redirect("course_detail", course_id=course_id)
-
-    if request.method == "POST" and "remove_student" in request.POST:
-        student_id = request.POST.get("student_id")
-        student = get_object_or_404(User, id=student_id)
-        course.students.remove(student)
-        messages.success(
-            request, f"✅ Ученик {student.get_full_name()} удален из курса!"
-        )
-        return redirect("course_detail", course_id=course_id)
-
-    if request.method == "POST" and "create_announcement" in request.POST:
-        announcement_form = AnnouncementForm(request.POST)
-        if announcement_form.is_valid():
-            announcement = announcement_form.save(commit=False)
-            announcement.course = course
-            announcement.author = request.user
-            announcement.save()
-            messages.success(request, "✅ Объявление опубликовано!")
-            return redirect("course_detail", course_id=course_id)
-    else:
-        announcement_form = AnnouncementForm()
-
-    available_students = User.objects.filter(profile__role="student").exclude(
-        courses_enrolled=course
-    )
-
-    context = {
-        "course": course,
-        "assignments": course.assignments.all(),
-        "announcements": course.announcements.all(),
-        "students": course.students.all(),
-        "available_students": available_students,
-        "announcement_form": announcement_form,
-    }
-
-    return render(request, "course_detail.html", context)
 
 
 @login_required
@@ -426,20 +374,7 @@ def my_courses(request):
     return render(request, "my_courses.html", context)
 
 
-@login_required
-def enroll_course(request, course_id):
-    if not student_check(request.user):
-        messages.error(request, "❌ Только ученики могут записываться на курсы.")
-        return redirect("dashboard")
 
-    course = get_object_or_404(Course, id=course_id)
-
-    if request.method == "POST":
-        course.students.add(request.user)
-        messages.success(request, f'✅ Вы успешно записались на курс "{course.title}"!')
-        return redirect("my_courses")
-
-    return render(request, "enroll_course.html", {"course": course})
 
 
 @login_required
@@ -646,3 +581,114 @@ def update_avatar(request):
             messages.error(request, f"❌ Ошибка при загрузке аватара: {str(e)}")
 
     return redirect("profile")
+@login_required
+@user_passes_test(student_check, login_url="/dashboard/")
+def submit_assignment(request, assignment_id):
+    """Страница сдачи задания учеником"""
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+
+    # Проверяем, что ученик записан на курс
+    if request.user not in assignment.course.students.all():
+        messages.error(request, "❌ Вы не записаны на этот курс.")
+        return redirect("dashboard")
+
+    # Проверяем, что задание опубликовано
+    if assignment.status != "published":
+        messages.error(request, "❌ Это задание недоступно для сдачи.")
+        return redirect("course_detail", course_id=assignment.course.id)
+
+    # Проверяем, не просрочено ли задание
+    if timezone.now() > assignment.due_date:
+        messages.warning(request, "⚠️ Срок сдачи задания истёк!")
+
+    # Получаем существующую попытку сдачи
+    submission = Submission.objects.filter(
+        assignment=assignment,
+        student=request.user
+    ).first()
+
+    if request.method == "POST":
+        form = SubmissionForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            # Если уже есть попытка, обновляем её
+            if submission:
+                submission.content = form.cleaned_data['content']
+                if form.cleaned_data.get('file'):
+                    submission.file = form.cleaned_data['file']
+                submission.submitted_at = timezone.now()
+                submission.save()
+                messages.success(request, "✅ Решение обновлено!")
+            else:
+                # Создаем новую попытку
+                submission = form.save(commit=False)
+                submission.assignment = assignment
+                submission.student = request.user
+                submission.save()
+                messages.success(request, "✅ Решение успешно отправлено!")
+
+            # Отправляем уведомление учителю
+            try:
+                teacher = assignment.teacher
+                # Здесь можно добавить отправку email или другие уведомления
+                messages.info(
+                    request,
+                    f"📬 Учитель {teacher.get_full_name()} получил уведомление о вашей сдаче."
+                )
+            except:
+                pass
+
+            return redirect("assignment_detail", assignment_id=assignment.id)
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+    else:
+        # Если есть предыдущая сдача, предзаполняем форму
+        if submission:
+            form = SubmissionForm(instance=submission)
+        else:
+            form = SubmissionForm()
+
+    # Подсчитываем время до дедлайна
+    time_remaining = assignment.due_date - timezone.now()
+    hours_remaining = int(time_remaining.total_seconds() // 3600)
+
+    # Получаем информацию о курсе
+    course = assignment.course
+
+    context = {
+        'assignment': assignment,
+        'course': course,
+        'form': form,
+        'submission': submission,
+        'hours_remaining': hours_remaining,
+        'time_remaining': time_remaining,
+        'is_overdue': assignment.is_overdue(),
+        'max_file_size': 10,  # Максимальный размер файла в MB
+    }
+
+    return render(request, 'submit_assignment.html', context)
+
+
+@login_required
+@user_passes_test(student_check, login_url="/dashboard/")
+def view_submission(request, submission_id):
+    """Просмотр отправленного решения"""
+    submission = get_object_or_404(Submission, id=submission_id)
+
+    # Проверяем, что ученик имеет доступ к этому решению
+    if submission.student != request.user:
+        messages.error(request, "❌ У вас нет доступа к этому решению.")
+        return redirect("dashboard")
+
+    assignment = submission.assignment
+    course = assignment.course
+
+    context = {
+        'submission': submission,
+        'assignment': assignment,
+        'course': course,
+    }
+
+    return render(request, 'view_submission.html', context)
